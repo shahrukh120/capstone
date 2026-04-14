@@ -1,0 +1,19 @@
+# Azure override — use with: docker compose -f docker-compose.yml -f docker-compose.azure.yml up
+# This removes the local DB service and uses Azure Database for PostgreSQL instead.
+services:
+  db:
+    # Disable local DB when using Azure PostgreSQL
+    profiles: ["local-only"]
+
+  app:
+    depends_on: []
+    environment:
+      DATABASE_URL: ${DATABASE_URL}  # Azure PostgreSQL connection string with ?sslmode=require
+      GROQ_API_KEY: ${GROQ_API_KEY:-}
+      NVIDIA_API_KEY: ${NVIDIA_API_KEY:-}
+      NVIDIA_BASE_URL: ${NVIDIA_BASE_URL:-https://integrate.api.nvidia.com/v1}
+      NVIDIA_MODEL: ${NVIDIA_MODEL:-meta/llama-3.3-70b-instruct}
+      EMBEDDING_MODEL: all-MiniLM-L6-v2
+      LLM_MODEL: ${LLM_MODEL:-llama-3.3-70b-versatile}
+      LLM_PROVIDER: ${LLM_PROVIDER:-nvidia}
+    volumes: []  # No local volume mounts on Azure
