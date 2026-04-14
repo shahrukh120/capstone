@@ -7,11 +7,13 @@ Usage:
 """
 import json
 import sys
+import time
 import requests
 from pathlib import Path
 
 PARSED_DIR = Path(__file__).resolve().parent.parent / "parsed_resumes"
 BATCH_SIZE = 50  # candidates per request
+MAX_RETRIES = 3
 
 
 def main():
@@ -43,16 +45,28 @@ def main():
         batch.append(data)
 
         if len(batch) >= BATCH_SIZE or i == len(json_files) - 1:
-            try:
-                resp = requests.post(seed_url, json=batch, timeout=120)
-                resp.raise_for_status()
-                result = resp.json()
-                total_inserted += result["inserted"]
-                total_skipped += result["skipped"]
-                print(f"  Batch {i // BATCH_SIZE + 1}: +{result['inserted']} inserted, "
-                      f"{result['skipped']} skipped ({i + 1}/{len(json_files)} processed)")
-            except Exception as e:
-                print(f"  ERROR on batch ending at file {i}: {e}")
+            for retry in range(MAX_RETRIES):
+                try:
+                    resp = requests.post(seed_url, json=batch, timeout=120)
+                    if resp.status_code == 429:
+                        wait = 5 * (retry + 1)
+                        print(f"  Rate limited, waiting {wait}s...")
+                        time.sleep(wait)
+                        continue
+                    resp.raise_for_status()
+                    result = resp.json()
+                    total_inserted += result["inserted"]
+                    total_skipped += result["skipped"]
+                    print(f"  Batch {i // BATCH_SIZE + 1}: +{result['inserted']} inserted, "
+                          f"{result['skipped']} skipped ({i + 1}/{len(json_files)} processed)")
+                    break
+                except requests.exceptions.HTTPError as e:
+                    if "429" not in str(e):
+                        print(f"  ERROR on batch ending at file {i}: {e}")
+                        break
+                except Exception as e:
+                    print(f"  ERROR on batch ending at file {i}: {e}")
+                    break
             batch = []
 
     print(f"\nDone! Inserted: {total_inserted}, Skipped: {total_skipped}")

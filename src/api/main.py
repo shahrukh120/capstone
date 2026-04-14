@@ -71,8 +71,8 @@ async def rate_limit_middleware(request: Request, call_next):
     client_ip = request.client.host if request.client else "unknown"
     path = request.url.path
 
-    # Skip rate limiting for static files and health
-    if path.startswith("/static") or path == "/health" or path == "/":
+    # Skip rate limiting for static files, health, and admin/seed endpoints
+    if path.startswith("/static") or path == "/health" or path == "/" or path.startswith("/seed"):
         return await call_next(request)
 
     # Choose limiter based on endpoint
