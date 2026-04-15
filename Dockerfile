@@ -10,12 +10,20 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     curl \
     && rm -rf /var/lib/apt/lists/*
 
-# Python dependencies
+# ── Install PyTorch CPU-only FIRST (saves ~2GB vs default CUDA build) ──
+RUN pip install --no-cache-dir \
+    torch==2.8.0 --index-url https://download.pytorch.org/whl/cpu
+
+# ── Install remaining Python dependencies ──
 COPY requirements.txt .
 RUN pip install --no-cache-dir --default-timeout=1000 -r requirements.txt
 
 # Pre-download the embedding model so container startup is fast
 RUN python -c "from sentence_transformers import SentenceTransformer; SentenceTransformer('all-MiniLM-L6-v2')"
+
+# ── Clean up build deps and caches to shrink image ──
+RUN apt-get purge -y build-essential && apt-get autoremove -y \
+    && rm -rf /var/lib/apt/lists/* /root/.cache /tmp/*
 
 # Copy application code
 COPY config/ config/
