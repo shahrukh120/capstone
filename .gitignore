@@ -8,9 +8,8 @@ dist/
 build/
 .pytest_cache/
 
-# Data & logs (too large for git)
+# Data & logs
 data/
-parsed_resumes/
 parse_log.txt
 
 # OS

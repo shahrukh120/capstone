@@ -1,0 +1,56 @@
+{
+  "file_name": "80000092",
+  "category": "FITNESS",
+  "name": null,
+  "email": null,
+  "phone": null,
+  "skills": [
+    "Superior communication skills",
+    "Solution-focused counseling",
+    "Exceptional problem solver",
+    "Positive attitude"
+  ],
+  "experience": [
+    {
+      "title": "Server",
+      "company": "Company Name",
+      "start": "01/2017",
+      "end": "Current",
+      "description": "Spoke with patrons to ensure satisfaction with food and service Displayed enthusiasm and knowledge about the restaurant's menu and products. Communicated with other kitchen team members to ensure food was prepared on time and correctly."
+    },
+    {
+      "title": "Server",
+      "company": "Company Name",
+      "start": "08/2016",
+      "end": "12/2016",
+      "description": "Provided friendly and attentive service and exceptional hospitality. Set dining tables according to type of event and service standards. Consistently offered professional, friendly and engaging service. Stocked service stations with items such as ice, napkins, and straws."
+    },
+    {
+      "title": "Front Desk",
+      "company": "Company Name",
+      "start": "01/2014",
+      "end": "05/2015",
+      "description": "Promoted club programs, products and services to participants Trained all new sales employees on effective techniques. Listened to customer needs and preferences to provide accurate advice. Corrected dangerous movements and suggested alternate exercises."
+    }
+  ],
+  "education": [
+    {
+      "degree": "High School Diploma",
+      "institution": "Jackson Liberty High School",
+      "year": "2012"
+    },
+    {
+      "degree": "Associate of Science : Psychology",
+      "institution": "University of South Florida",
+      "year": null
+    },
+    {
+      "degree": "Associate of Science : Psychology",
+      "institution": "Temple University",
+      "year": null
+    }
+  ],
+  "summary": "Ambitious student looking for an opportunity to use my knowledge and experience to learn about the mental health field.",
+  "total_years_experience": 4.0,
+  "raw_text": "SERVER\nProfessional Summary\nAmbitious student looking for an opportunity to use my knowledge and experience to learn about the mental health field.\nSkill Highlights\nSuperior communication skills\nSolution-focused counseling\nExceptional problem solver\nPositive attitude\nProfessional Experience\nCompany Name City , State Server 01/2017 to Current\nSpoke with patrons to ensure satisfaction with food and service Displayed enthusiasm and knowledge about the restaurant's menu and\nproducts.\nCommunicated with other kitchen team members to ensure food was prepared on time and correctly.\nCompany Name City , State Server 08/2016 to 12/2016\nProvided friendly and attentive service and exceptional hospitality.\nSet dining tables according to type of event and service standards.\nConsistently offered professional, friendly and engaging service.\nStocked service stations with items such as ice, napkins, and straws.\nCompany Name City , State Front Desk 01/2014 to 05/2015\nPromoted club programs, products and services to participants\nTrained all new sales employees on effective techniques.\nListened to customer needs and preferences to provide accurate advice.\nCorrected dangerous movements and suggested alternate exercises.\nEducation and Training\nHigh School Diploma 2012 Jackson Liberty High School , City , State\nAssociate of Science : Psychology University of South Florida Psychology\nAssociate of Science : Psychology Temple University , City , State Psychology"
+}

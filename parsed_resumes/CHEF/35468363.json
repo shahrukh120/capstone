@@ -1,0 +1,48 @@
+{
+  "file_name": "35468363",
+  "category": "CHEF",
+  "name": "Sushi Chef",
+  "email": null,
+  "phone": null,
+  "skills": [
+    "kitchen management",
+    "food cost percentage",
+    "labor cost budgeting",
+    "scheduling",
+    "menu developing",
+    "strategic planning"
+  ],
+  "experience": [
+    {
+      "title": "Sushi Chef",
+      "company": "Company Name",
+      "start": "May 2005",
+      "end": "November 2011",
+      "description": "In charge of daily operation in the sushi bar, quality control, monthly inventory, menu developing, scheduling for 10 employees."
+    },
+    {
+      "title": "Executive Sous Chef",
+      "company": "Company Name",
+      "start": "November 2011",
+      "end": "January 2015",
+      "description": "In charge of daily operations, menu developing, Monthly inventory, scheduling for 50 people,"
+    },
+    {
+      "title": "Corporate Chef",
+      "company": "Company Name",
+      "start": "January 2016",
+      "end": "Current",
+      "description": "In Charge of daily operations of all restaurants, Menu developing, Scheduling for 90 people, Food Cost Percentage, Labor Cost control, Hiring, Monthly Inventory."
+    }
+  ],
+  "education": [
+    {
+      "degree": "Associate of Arts : culinary arts",
+      "institution": "Le Cordon Bleu",
+      "year": "2006"
+    }
+  ],
+  "summary": "14 years experience in high end restaurants with a background in French, Japanese and Peruvian Cuisine.",
+  "total_years_experience": 17.083333333333332,
+  "raw_text": "SUSHI CHEF\nExecutive Profile\n14 years experience in high end restaurants with a background in French, Japanese and Peruvian Cuisine.Â Expertise in all facets of kitchen\nmanagement, including Food cost Percentage, labor cost budgeting, scheduling, menu developing and strategic planning.Â\nProfessional Experience\nMay 2005\nto\nNovember 2011\nCompany Name City , State Sushi Chef In charge of daily operation in the sushi bar, quality control, monthly inventory, menu developing,\nscheduling for 10 employees.Â\nNovember 2011\nto\nJanuary 2015\nCompany Name City , State Executive Sous Chef In charge of daily operations, menu developing, Monthly inventory, scheduling for 50 people,\nJanuary 2016\nto\nCurrent\nCompany Name City , State Corporate Chef In Charge of daily operations of all restaurants, Menu developing, Scheduling for 90 people, Food\nCost Percentage, Labor Cost control, Hiring, Monthly Inventory.\nEducation\n2006\nLe Cordon Bleu City , State , usa Associate of Arts : culinary arts"
+}

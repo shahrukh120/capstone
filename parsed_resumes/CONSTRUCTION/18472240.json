@@ -1,0 +1,61 @@
+{
+  "file_name": "18472240",
+  "category": "CONSTRUCTION",
+  "name": null,
+  "email": null,
+  "phone": null,
+  "skills": [
+    "c",
+    "inventory",
+    "windows",
+    "painting",
+    "plumbing",
+    "repairs",
+    "roofing"
+  ],
+  "experience": [
+    {
+      "title": null,
+      "company": "Company Name",
+      "start": "04/2015",
+      "end": "Current",
+      "description": "Repair a/c units, repair and replace water heaters, stoves, and refrigerators, change out faulty valves and faucets, unclog drains, toilets, snake clean-outs, change out windows and locks, make repairs to sheetrock if damaged, roof repairs and painting inside and outside, controls inventory, creates orders with vendors, train, coached and mentored staff to ensure smooth adoption of new rules"
+    },
+    {
+      "title": null,
+      "company": "Company Name",
+      "start": "07/2010",
+      "end": "02/2015",
+      "description": "Maintain 320 units in Jasmine Terrace complex, which consists of repairs to AC window units, repair and replace water heaters, stoves and refrigerators, change out faulty valves and faucets, unclog drains, toilets, snake clean outs, change out windows and locks, make repairs to sheetrock if damaged, roof repairs and painting inside and out, controls inventory, create orders, with vendors, trained, coached and mentored staff to ensure smooth adoption of new rules"
+    },
+    {
+      "title": null,
+      "company": "Construction Company Name",
+      "start": "03/2007",
+      "end": "05/2010",
+      "description": "Plumbing, roofing, sheetrock, painting, replace water heaters, general apprentice and construction"
+    },
+    {
+      "title": null,
+      "company": "Painter Company Name",
+      "start": "03/2005",
+      "end": "03/2007",
+      "description": "Paint and repair the outside of problems in a timely matter, pressure washed houses and made repairs to old / damaged frames"
+    }
+  ],
+  "education": [
+    {
+      "degree": "GED",
+      "institution": "Central Florida College",
+      "year": "2005"
+    },
+    {
+      "degree": "EPA Certified Universal",
+      "institution": null,
+      "year": "2009"
+    }
+  ],
+  "summary": null,
+  "total_years_experience": 17.4,
+  "raw_text": "CONSTRUCTION\nExperience\n04/2015 to Current\nCompany Name\nRepair a/c units Repair and replace water heaters, stoves, and refrigerators.\nChange out faulty valves and faucets.\nUnclog drains, toilets, snake clean-outs.\nChange out windows and locks.\nMake repairs to sheetrock if damaged, roof repairs and painting inside and outside.\nControls inventory, creates orders with vendors.\nTrain, coached and mentored staff to ensure smooth adoption of new rules.\n07/2010 to 02/2015\nCompany Name ï¼​ City , State\nMaintain 320 units in Jasmine Terrace complex, which consists of repairs to AC window units.\nRepair and replace water heaters, stoves and refrigerators.\nChange out faulty valves and faucets, unclog drains, toilets, snake clean outs.\nChange out windows and locks.\nMake repairs to sheetrock if damaged Roof repairs and painting inside and out.\nControls inventory, create orders, with vendors.\nTrained, coached and mentored staff to ensure smooth adoption of new rules.\n03/2007 to 05/2010\nConstruction Company Name ï¼​ City , State\nPlumbing, roofing, sheetrock, painting.\nReplace water heaters.\nGeneral apprentice and construction.\n03/2005 to 03/2007\nPainter Company Name ï¼​ City , State\nPaint and repair the outside of problems in a timely matter.\nPressure washed houses and made repairs to old / damaged frames.\nEducation\n2005\nGED Central Florida College ï¼​ City , State\n2009\nEPA Certified Universal\nSkills\nc, inventory, windows, window, painting, Paint, Plumbing, repairs, roofing"
+}

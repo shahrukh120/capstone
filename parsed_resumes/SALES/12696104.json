@@ -1,0 +1,52 @@
+{
+  "file_name": "12696104",
+  "category": "SALES",
+  "name": null,
+  "email": null,
+  "phone": null,
+  "skills": [
+    "communicating",
+    "interacting with customers",
+    "time management",
+    "self-motivation",
+    "adaptability"
+  ],
+  "experience": [
+    {
+      "title": "Sales Associate",
+      "company": "Company Name",
+      "start": "03/2016",
+      "end": "10/2016",
+      "description": "Interact with customers. Work the register. Answer calls."
+    },
+    {
+      "title": "Sales Associate/Smoothie Maker",
+      "company": "Company Name",
+      "start": "10/2014",
+      "end": "03/2016",
+      "description": "Interact with customers. Organize inventory. Work the register."
+    },
+    {
+      "title": "Sales Associate",
+      "company": "Company Name",
+      "start": "09/2013",
+      "end": "09/2014",
+      "description": "Organize shelves and racks/inventory. Work the register. Answer calls. Interact with customers."
+    }
+  ],
+  "education": [
+    {
+      "degree": "High School Diploma",
+      "institution": "High School",
+      "year": "2015"
+    },
+    {
+      "degree": null,
+      "institution": "Suffolk County Community College",
+      "year": null
+    }
+  ],
+  "summary": "Motivated sales associate with 3+ years of sales and customer service experience.",
+  "total_years_experience": 3.0,
+  "raw_text": "SALES ASSOCIATE\nSummary\nMotivated sales associate with 3+ years of sales and customer service experience. Currently enrolled in Suffolk County Community College\nstudying culinary.\nExperience\n03/2016 to 10/2016\nSales Associate Company Name ï¼​ City , State\nInteract with customers.\nWork the register.\nAnswer calls.\n10/2014 to 03/2016\nSales Associate/Smoothie Maker Company Name ï¼​ City , State\nInteract with customers.\nOrganize inventory.\nWork the register.\n09/2013 to 09/2014\nSales Associate Company Name ï¼​ City , State\nOrganize shelves and racks/inventory.\nWork the register.\nAnswer calls.\nInteract with customers.\nEducation\n2015\nHigh School Diploma High School ï¼​ City , State\nSuffolk County Community College ï¼​ State\nSkills\n- Good at communicating and interacting with customers\n- Good time management\n-Â Self-motivation\n- Good adaptability"
+}

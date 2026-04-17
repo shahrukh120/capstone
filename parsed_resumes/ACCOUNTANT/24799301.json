@@ -1,0 +1,48 @@
+{
+  "file_name": "24799301",
+  "category": "ACCOUNTANT",
+  "name": "null",
+  "email": "null",
+  "phone": "null",
+  "skills": [
+    "accounting",
+    "CPA",
+    "local area network",
+    "Peachtree Accounting",
+    "Reporting",
+    "Web site"
+  ],
+  "experience": [
+    {
+      "title": "Accountant",
+      "company": "Company Name",
+      "start": "01/2009",
+      "end": "Current",
+      "description": "Hired by their CPA firm to handle all accounting and job cost Reporting."
+    },
+    {
+      "title": "Accountant",
+      "company": "Company Name",
+      "start": "01/2007",
+      "end": "01/2009",
+      "description": "Hired by their CPA firm to handle all accounting functions."
+    },
+    {
+      "title": "Accountant",
+      "company": "Company Name",
+      "start": "01/1997",
+      "end": "01/2007",
+      "description": "Installed new Peachtree Accounting System. Installed new computer system using a local area network and Added a Web site."
+    }
+  ],
+  "education": [
+    {
+      "degree": "B.S",
+      "institution": "University of Cincinnati",
+      "year": "1974"
+    }
+  ],
+  "summary": "Accountant for a Medium sized Company",
+  "total_years_experience": 17.0,
+  "raw_text": "ACCOUNTANT\nSummary\nAccountant for a Medium sized Company\nExperience\n01/2009 to Current\nAccountant Company Name ï¼​ City , State\nHired by their CPA firm to handle all accounting and job cost Reporting.\n01/2007 to 01/2009\nAccountant Company Name ï¼​ City , State\nHired by their CPA firm to handle all accounting functions..\n01/1997 to 01/2007\nAccountant Company Name ï¼​ City , State\nInstalled new Peachtree Accounting System.\nInstalled new computer system using a local area network and Added a Web site.\nEducation and Training\n1974\nB.S : Business Administration Accounting University of Cincinnati ï¼​ City , State Business Administration Accounting\nInterests\nAnnapolis Amblers Walking Club, President &Trailmaster, Maryland Volkssport Assn, President, Chesapeake Civil War Roundtable.\nSkills\naccounting, CPA, local area network, Peachtree Accounting, Reporting, Web site\nAdditional Information\nInterests Annapolis Amblers Walking Club, President &Trailmaster, Maryland Volkssport Assn, President, Chesapeake Civil War\nRoundtable."
+}

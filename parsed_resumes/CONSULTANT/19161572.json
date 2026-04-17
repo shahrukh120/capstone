@@ -1,0 +1,81 @@
+{
+  "file_name": "19161572",
+  "category": "CONSULTANT",
+  "name": "null",
+  "email": "null",
+  "phone": "null",
+  "skills": [
+    "Superior troubleshooting ability",
+    "Ability to install and configure networks and personal computers",
+    "Excellent customer service skills",
+    "A+",
+    "A+ Certification",
+    "basic",
+    "cabling",
+    "Hardware",
+    "database",
+    "desktops",
+    "laptops",
+    "Office",
+    "MS Windows",
+    "network",
+    "networks",
+    "Troubleshoot",
+    "wiring"
+  ],
+  "experience": [
+    {
+      "title": "Consultant",
+      "company": "Company Name",
+      "start": "January 2008",
+      "end": "Current",
+      "description": "Provide support for laptops, desktops and networks. Troubleshoot all computer issues both remote and onsite. Custom build systems based on user specifications."
+    },
+    {
+      "title": "Instructor",
+      "company": "Company Name",
+      "start": "October 2003",
+      "end": "December 2008",
+      "description": "Taught basic and advanced computer classes. Created appropriate assessments to verify learning. Classes included: MS Windows, Office and A+ Certification."
+    },
+    {
+      "title": "Computer Technician",
+      "company": "Company Name",
+      "start": "September 2003",
+      "end": "November 2006",
+      "description": "Travelled throughout the state. Installed and repaired both hardware and software systems. Kept on-call hours on both nights and weekends."
+    },
+    {
+      "title": "Computer Technician",
+      "company": "Company Name",
+      "start": "June 2002",
+      "end": "August 2003",
+      "description": "Maintained uptime of computer network and database systems for students and facility. Ran wiring and cabling for entire network in schools. Consulted with faculty that had computer issues."
+    }
+  ],
+  "education": [
+    {
+      "degree": "Masters of Education",
+      "institution": "Thomas College",
+      "year": "2012"
+    },
+    {
+      "degree": "Bachelor : Computer Information Systems",
+      "institution": "Thomas College",
+      "year": "2010"
+    },
+    {
+      "degree": "CompTIA A+ Hardware and Software",
+      "institution": "null",
+      "year": "2002"
+    },
+    {
+      "degree": "MMTC Net+ Certification",
+      "institution": "null",
+      "year": "2003"
+    }
+  ],
+  "summary": "null",
+  "total_years_experience": 18.0,
+  "raw_text": "CONSULTANT\nProfile\nKnowledge of most common operating system *Superior troubleshooting ability *Ability to install and configure networks and personal computers\n*Excellent customer service skills\nProfessional Experience\nCompany Name January 2008 to Current Consultant\nCity , State\nProvide support for laptops, desktops and networks.\nTroubleshoot all computer issues both remote and onsite.\nCustom build systems based on user specifications.\nCompany Name October 2003 to December 2008 Instructor\nCity , State\nTaught basic and advanced computer classes.\nCreated appropriate assessments to verify learning.\nClasses included: MS Windows, Office and A+ Certification.\nCompany Name September 2003 to November 2006 Computer Technician\nCity , State\nTravelled throughout the state.\nInstalled and repaired both hardware and software systems.\nKept on-call hours on both nights and weekends.\nCompany Name June 2002 to August 2003 Computer Technician\nCity , State\nMaintained uptime of computer network and database systems for students and facility.\nRan wiring and cabling for entire network in schools.\nConsulted with faculty that had computer issues.\nEducation\nThomas College 2012 Masters of Education City , State\nThomas College 2010 Bachelor : Computer Information Systems City , State Computer Information Systems\n2002 CompTIA A+ Hardware and Software\n2003 MMTC Net+ Certification\nSkills\nA+, A+ Certification, basic, cabling, Hardware, database, desktops, laptops, Office, MS Windows, network, networks, Troubleshoot, wiring"
+}

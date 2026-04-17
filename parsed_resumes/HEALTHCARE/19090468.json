@@ -1,0 +1,88 @@
+{
+  "file_name": "19090468",
+  "category": "HEALTHCARE",
+  "name": null,
+  "email": null,
+  "phone": null,
+  "skills": [
+    "Project Management",
+    "Cloud Computing Services",
+    "Data Center Migration",
+    "Application Integration & Support",
+    "System Integration",
+    "Account Management",
+    "Linux",
+    "Red Hat",
+    "Apache",
+    "Oracle",
+    "Java",
+    "Bash scripting",
+    "Security",
+    "Satellite patching",
+    "Auditing",
+    "Unix automation",
+    "Puppet Automation Tool",
+    "TCP/IP networking",
+    "UNIX/LINUX",
+    "VMware",
+    "Veritas Cluster Server",
+    "Tomcat",
+    "Web Logic",
+    "NetScout",
+    "Bib Brother",
+    "NGROSS",
+    "LVM",
+    "PCI Compliance Patching",
+    "DNS",
+    "NIS",
+    "NFS",
+    "Jumpstart",
+    "Kickstart",
+    "HP-UX",
+    "MC/Service Guard",
+    "Ignite-UX",
+    "Superdome",
+    "Disaster Recovery"
+  ],
+  "experience": [
+    {
+      "title": "Technical IT Healthcare Consultant",
+      "company": "Company Name",
+      "start": "04/2014",
+      "end": "Current",
+      "description": "Design, Build, Test, and Deploy base upon technical requirements of vendor. System installations and maintenance. Implementation of Medisoft V20 Healthcare Application for Clinical Healthcare Facility."
+    },
+    {
+      "title": "Linux System Administrator",
+      "company": "Company Name",
+      "start": "10/2012",
+      "end": "01/2014",
+      "description": "Linux Red Hat - configuration, installations, administration, and monitoring twenty IBM Blades with fault tolerant, snapshot, LVM, and selinux. Manage and troubleshoot Linux servers, network, and application issues."
+    },
+    {
+      "title": "UNIX/LINUX System Administrator",
+      "company": "Company Name",
+      "start": "04/2010",
+      "end": "08/2012",
+      "description": "Managed, administered, and provided remote troubleshooting and analysis for server/client configuration, TCP/IP networking hardware, protocols, LAN and WAN technologies for over 500 servers running Red Hat version 5.6 and Solaris 9.0."
+    },
+    {
+      "title": "HP-System Administrator",
+      "company": "Company Name",
+      "start": "02/2007",
+      "end": "03/2010",
+      "description": "This position requires the maintenance and support of over 900 servers running HP-UX 9, 10, 11i, and linux servers."
+    },
+    {
+      "title": "HP-UX System Administrator",
+      "company": "Company Name",
+      "start": "01/1995",
+      "end": "02/2007",
+      "description": "This position required the maintenance and support of over 1000 HP"
+    }
+  ],
+  "education": [],
+  "summary": "Technical IT Healthcare Consultant building enterprise-class IT systems for a range of industries.",
+  "total_years_experience": 28.5,
+  "raw_text": "TECHNICAL IT HEALTHCARE CONSULTANT\nProfessional Summary\nExperience Technical Consultant building enterprise-class IT systems for a range of industries such as: financial businesses, health-care industry,\ntelecommunication, distribution, manufacturing, transportation and pharmaceutical.\nSkills\nProject Management\nCloud Computing Services\nData Center Migration\nApplication Integration & Support\nSystem Intergration\nAccount Management\nWork History\nTechnical IT Healthcare Consultant Company Name - City , State 04/2014 - Current\nDesign,Build, Test, and Deploy base upon technical requirements of vendor.\nSystem installations and maintenance (Window 8 Professional server, desktop, network).\nImplementation of Medisoft V20 Healthcare Application for Clinical Healthcare Facility.\nProvided Data conversion from existing system to Medisoft V20.\nperformance tuning and troubleshooting of server, network, desktop.\nAutomation of Backup/Restore.\nParticipate in on-call rotation 24x7.\nLinux System Administrator Company Name - City , State 10/2012 - 01/2014\nLinux Red Hat - configuration, installations, administration, and monitoring twenty IBM Blades with fault tolerant, snapshot, LVM, and\nselinux.\nManage and troubleshoot Linux servers, network, and application issues (Apache, Oracle, Java) System Administration, bash scripting,\nsecurity, satellite patching, auditing, Unix automation Managing and Administrating automation process utilizing Puppet Automation Tool to\nimplement applications, packages, and upgrades on window and linux environment.\nTCP/IP networking and troubleshooting and maintain Level 2 and 3 support (24x7).\nUNIX/LINUX System Administrator Company Name - City , State 04/2010 - 08/2012\nManaged, administered, and provided remote troubleshooting and analysis for server/client configuration, TCP/IP networking hardware,\nprotocols, LAN and WAN technologies for over 500 servers running Red Hat version 5.6 and Solaris 9.0 Veritas Cluster Server -\nmaintenance on are group applications in the VCS environment Apache, Tomcat, Web Logic - primary support of all applications using\nApache and web logic VMware - Administrator primary support of all applications running VM Oracle Middleware/Database - system\nadministrative support Data Center Migration and Consolidation onto Cloud platform and enables.\nOpen System Technology diverted from IBM mainframe Tools - NetScout, Bib Brother, NGROSS, etc.\nLVM - crated file systems to match the specifications for UNIX servers System administration, scripting, security, patching, auditing, Unix\nautomation PCI Compliance Patching - primary support of all system and application patching for UNIX, Linus, Windows, Solaris System\nmonitoring and alerting tools; Maintain Level 2 and 3 support (24x7) DNS, NIS, NFS, Good Documentation skills Entry level experience\nwith Puppet Automation Tool Jumpstart, kickstart , Manage a highly distributed global network of server.\nHP-System Administrator Company Name - City , State 02/2007 - 03/2010\nThis position requires the maintenance and support of over 900 servers running HP-UX 9, 10, 11i, and linux servers.\nMC/Service Guard - configuration and maintenance on the exiting service guard clusters for the Oracle databases Ignite-UX - configuration,\ninstall and support for DR and build HP-UX Linux Red Hat - configuration and installations of Red Hat version 5.3 on IBM Blades, HP\nBlades and Dell Blades Superdome - created new Vpar partitions and maintenance on the existing Scripting - write shell scripts to perform\nmonitoring and daily maintenance of the applications and operating systems Disaster Recovery - planning, implementing and documenting\nLVM - manage physical disks, luns, file systems and volume groups Analyze technical and business requirements/Engineering design and\nlayout Application maintenance and support for Highly Critical Application.\nHP-UX System Administrator Company Name - City , State 01/1995 - 02/2007\nThis position required the maintenance and support of over 1000 HP-UX servers running HP-UX versions 10.20 and 11.X.\nPerformed all system administration functions on the HP-UX server for the crisis management team Superdome - SM, maintenance, patches\nand upgrades HP_UX System Performance - provided technical solutions to customers and high level support organizations within Hewlett\nPackard to increase system performance Veritas Clustering - primary support and implemented VCS Clustering Disaster Recovery -\nperform, document and maintain DR procedure and guideline for Off-site DR drills KVM -created file systems to match the specifications\nfor UNIX servers Korn Shell scripting, security, auditing, UNIX Automation PCI Compliance Patching - primary support of all systems.\nEducation\nBachelor of Science : Accounting and Computer Science Georgia State University - City , State 1987\nHewlett Packard Corporation HP-Unix Training and Support IBM Corporation Disaster Recover Certification :\nRecipient of MathematicÂ Scholarship to Texas Southern University\nTechnical Certification in IT Technology - Sponsor by Ford Motor Aerospace and Technology Division : Programming and Computer Science\nGeorgia Tech Institute - City , State 1990\nTechnical IT Certification : Programming and Technology Georgia Tech Institute - City , State 1992\nCertifications\nDeploy Hadoop Cluster . Configuration and Performance Tuning Load Data and Run Application . Monitoring and Troubleshooting Provide\nTechnical Assistance in Administration and Automation Hardware: IBM Blade Technology, HP Blade, Cisco UCS Blade Technology, Dell\nTechnology, HP Servers,\nSkills\nadministrative support, Apache, auditing, Automation, Backup, bash, Cisco, Clustering, Hardware, Consultant, crisis management, client, Data\nconversion, databases, Database, Dell, DHCP, Disaster Recovery, Disaster Recovery - planning, DNS, Documentation, FTP, Hewlett Packard,\nHP, HP-UX, HP-UX 9, UX, HP Servers, IBM, IBM mainframe, Java, Korn Shell, LAN, layout, Linux, Logic, Managing, Medisoft, mail,\nWindows, window, Window 8, Middleware, Migration, network, NFS, NIS, operating systems, Oracle, PCI, protocols, Red Hat, servers,\nscripting, shell scripts, SNMP, Solaris 9.0, Solaris, System Administration, TCP/IP networking, Technical Assistance, Tomcat, troubleshoot,\nTroubleshooting, HP-Unix, UNIX, UNIX servers, upgrades, Veritas Cluster Server, Veritas Clustering, VM, WAN"
+}
