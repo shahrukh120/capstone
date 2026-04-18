@@ -18,6 +18,7 @@ document.querySelectorAll('.sidebar-link').forEach(link => {
     if (page === 'dashboard') loadDashboard();
     if (page === 'jobs') loadJobs();
     if (page === 'candidates') loadCandidates();
+    if (page === 'pipeline') loadPipeline();
   });
 });
 
@@ -156,7 +157,7 @@ async function createJob() {
 }
 
 function populateJobSelects(jobs) {
-  const selects = ['match-job-select', 'interview-job-select', 'bias-job-select', 'explain-job-select'];
+  const selects = ['match-job-select', 'interview-job-select', 'bias-job-select', 'explain-job-select', 'pipeline-job-select'];
   selects.forEach(id => {
     const el = document.getElementById(id);
     if (!el) return;
@@ -266,7 +267,11 @@ async function runMatching() {
             <div class="score-bar ${scoreColor(m.match_score)} h-2 rounded-full" style="width: ${pct}%"></div>
           </div>
           <div>${skillTags(m.skills, 10)}</div>
-          <div class="mt-3 flex gap-2">
+          <div class="mt-3 flex flex-wrap gap-2">
+            <button onclick="addToPipeline(${m.candidate_id}, ${jobId}, ${m.match_score})" class="text-xs text-emerald-600 border border-emerald-200 px-3 py-1 rounded-lg hover:bg-emerald-50 flex items-center gap-1">
+              <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
+              Add to Pipeline
+            </button>
             <button onclick="document.getElementById('interview-candidate').value=${m.candidate_id}; document.getElementById('interview-job-select').value=${jobId}; navigateTo('interview'); generateInterview()" class="text-xs text-indigo-600 border border-indigo-200 px-3 py-1 rounded-lg hover:bg-indigo-50">Generate Interview</button>
             <button onclick="document.getElementById('explain-candidate').value=${m.candidate_id}; document.getElementById('explain-job-select').value=${jobId}; navigateTo('bias'); runExplain()" class="text-xs text-indigo-600 border border-indigo-200 px-3 py-1 rounded-lg hover:bg-indigo-50">Explain Score</button>
           </div>
@@ -672,6 +677,249 @@ async function switchProvider(provider) {
   } catch (e) {
     alert(`Failed to switch: ${e.message}`);
   }
+}
+
+// ─── Pipeline (Kanban Board) ────────────────────────────────────────
+const STAGE_META = {
+  applied:   { label: 'Applied',   color: 'bg-indigo-100 text-indigo-700' },
+  screened:  { label: 'Screened',  color: 'bg-sky-100 text-sky-700' },
+  interview: { label: 'Interview', color: 'bg-amber-100 text-amber-700' },
+  offer:     { label: 'Offer',     color: 'bg-violet-100 text-violet-700' },
+  hired:     { label: 'Hired',     color: 'bg-emerald-100 text-emerald-700' },
+  rejected:  { label: 'Rejected',  color: 'bg-red-100 text-red-700' },
+};
+
+async function loadPipeline() {
+  const sel = document.getElementById('pipeline-job-select');
+  if (!sel || !sel.value) return;
+  const jobId = sel.value;
+
+  show('pipeline-loading');
+  document.getElementById('pipeline-board').innerHTML = '';
+
+  try {
+    const data = await api(`/pipeline/${jobId}`);
+    hide('pipeline-loading');
+    document.getElementById('pipeline-total').textContent = data.total;
+    renderPipelineBoard(data);
+  } catch (e) {
+    hide('pipeline-loading');
+    document.getElementById('pipeline-board').innerHTML =
+      `<div class="bg-red-50 text-red-600 p-4 rounded-xl text-sm w-full">${e.message}</div>`;
+  }
+}
+
+function renderPipelineBoard(data) {
+  const board = document.getElementById('pipeline-board');
+  board.innerHTML = data.columns.map(col => `
+    <div class="kanban-col">
+      <div class="kanban-col-header">
+        <span class="kanban-col-title">
+          <span class="stage-dot dot-${col.stage}"></span>
+          ${col.label}
+        </span>
+        <span class="kanban-count">${col.count}</span>
+      </div>
+      <div class="kanban-col-body" data-stage="${col.stage}"
+           ondragover="kanbanDragOver(event)"
+           ondragleave="kanbanDragLeave(event)"
+           ondrop="kanbanDrop(event)">
+        ${col.cards.length === 0
+          ? '<div class="kanban-empty">Drop here</div>'
+          : col.cards.map(c => renderKanbanCard(c)).join('')}
+      </div>
+    </div>
+  `).join('');
+  lucide.createIcons();
+}
+
+function renderKanbanCard(c) {
+  const score = c.match_score != null
+    ? `<span class="card-score ${scoreColor(c.match_score)} text-white">${(c.match_score * 100).toFixed(0)}%</span>`
+    : '';
+  const skills = (c.skills || []).slice(0, 4)
+    .map(s => `<span class="card-skill">${escapeHtml(s)}</span>`).join('');
+  const initials = (c.candidate_name || '?').split(' ').map(s => s[0]).filter(Boolean).slice(0, 2).join('').toUpperCase();
+  return `
+    <div class="kanban-card stage-${c.stage}"
+         draggable="true"
+         data-application-id="${c.application_id}"
+         data-stage="${c.stage}"
+         ondragstart="kanbanDragStart(event)"
+         ondragend="kanbanDragEnd(event)">
+      <div class="flex items-start justify-between gap-2">
+        <div class="flex-1 min-w-0">
+          <div class="card-name truncate">${escapeHtml(c.candidate_name || 'Unknown')}</div>
+          <div class="card-meta">${escapeHtml(c.category || '—')} · ${c.total_years_experience ?? '?'} yrs · #${c.candidate_id}</div>
+        </div>
+        <span class="text-[10px] font-bold text-gray-400 bg-gray-100 rounded w-7 h-7 flex items-center justify-center flex-shrink-0">${initials}</span>
+      </div>
+      <div class="card-skills">${skills}</div>
+      <div class="card-footer">
+        ${score || '<span class="text-[10px] text-gray-400">No score</span>'}
+        <span class="card-delete" onclick="removeFromPipeline(${c.application_id}, event)" title="Remove from pipeline">✕</span>
+      </div>
+    </div>`;
+}
+
+function escapeHtml(s) {
+  if (s == null) return '';
+  return String(s).replace(/[&<>"']/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));
+}
+
+// ─── Drag & drop handlers ──────────────────────────────────────────
+let _draggedAppId = null;
+let _draggedFromStage = null;
+
+function kanbanDragStart(e) {
+  const card = e.currentTarget;
+  _draggedAppId = card.dataset.applicationId;
+  _draggedFromStage = card.dataset.stage;
+  card.classList.add('dragging');
+  e.dataTransfer.effectAllowed = 'move';
+  try { e.dataTransfer.setData('text/plain', _draggedAppId); } catch (_) {}
+}
+
+function kanbanDragEnd(e) {
+  e.currentTarget.classList.remove('dragging');
+  document.querySelectorAll('.kanban-col-body.drag-over').forEach(el => el.classList.remove('drag-over'));
+}
+
+function kanbanDragOver(e) {
+  e.preventDefault();
+  e.dataTransfer.dropEffect = 'move';
+  e.currentTarget.classList.add('drag-over');
+}
+
+function kanbanDragLeave(e) {
+  // Only remove if leaving the column body entirely
+  if (e.currentTarget.contains(e.relatedTarget)) return;
+  e.currentTarget.classList.remove('drag-over');
+}
+
+async function kanbanDrop(e) {
+  e.preventDefault();
+  const col = e.currentTarget;
+  col.classList.remove('drag-over');
+  const newStage = col.dataset.stage;
+  const appId = _draggedAppId;
+  if (!appId || !newStage) return;
+  if (newStage === _draggedFromStage) return;
+
+  try {
+    await api(`/applications/${appId}/stage`, {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ stage: newStage }),
+    });
+    await loadPipeline();
+  } catch (err) {
+    alert('Failed to move: ' + err.message);
+    await loadPipeline();
+  } finally {
+    _draggedAppId = null;
+    _draggedFromStage = null;
+  }
+}
+
+async function removeFromPipeline(appId, e) {
+  if (e) { e.stopPropagation(); }
+  if (!confirm('Remove this candidate from the pipeline?')) return;
+  try {
+    await api(`/applications/${appId}`, { method: 'DELETE' });
+    await loadPipeline();
+  } catch (err) {
+    alert('Failed: ' + err.message);
+  }
+}
+
+async function addToPipeline(candidateId, jobId, matchScore) {
+  try {
+    const res = await api('/applications', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        candidate_id: candidateId,
+        job_role_id: parseInt(jobId),
+        stage: 'applied',
+        match_score: matchScore,
+      }),
+    });
+    const msg = res.duplicate ? 'Already in pipeline' : 'Added to pipeline ✓';
+    showToast(msg, res.duplicate ? 'warn' : 'success');
+  } catch (err) {
+    showToast('Failed: ' + err.message, 'error');
+  }
+}
+
+async function seedPipelineFromMatches() {
+  const sel = document.getElementById('pipeline-job-select');
+  if (!sel || !sel.value) return;
+  const jobId = parseInt(sel.value);
+  const btn = document.getElementById('pipeline-seed-btn');
+  const orig = btn ? btn.innerHTML : '';
+  if (btn) {
+    btn.disabled = true;
+    btn.style.opacity = '0.6';
+    btn.innerHTML = '<span class="loader" style="width:12px;height:12px;border-width:2px;vertical-align:middle;margin-right:6px"></span> Adding top 10...';
+  }
+  // Also show the main pipeline loader
+  show('pipeline-loading');
+
+  try {
+    // 1) Fetch top 10 matches
+    const data = await api(`/match/${jobId}?top_k=10`);
+    if (!data.matches?.length) {
+      showToast('No matches found for this job', 'warn');
+      return;
+    }
+
+    // 2) One bulk POST — avoids rate-limit thrash
+    const bulkPayload = data.matches.map(m => ({
+      candidate_id: m.candidate_id,
+      job_role_id: jobId,
+      stage: 'applied',
+      match_score: m.match_score,
+    }));
+    const res = await api('/applications/bulk', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(bulkPayload),
+    });
+
+    const msg = `Added ${res.added} new · ${res.duplicates} already in pipeline` +
+                (res.errors?.length ? ` · ${res.errors.length} failed` : '');
+    showToast(msg, res.added > 0 ? 'success' : 'warn');
+
+    // 3) Refresh board
+    await loadPipeline();
+  } catch (err) {
+    hide('pipeline-loading');
+    showToast('Failed: ' + err.message, 'error');
+  } finally {
+    if (btn) {
+      btn.disabled = false;
+      btn.style.opacity = '';
+      btn.innerHTML = orig;
+      lucide.createIcons();
+    }
+  }
+}
+
+function showToast(msg, type = 'info') {
+  const colors = {
+    success: 'bg-emerald-600',
+    warn:    'bg-amber-600',
+    error:   'bg-red-600',
+    info:    'bg-gray-800',
+  };
+  const toast = document.createElement('div');
+  toast.className = `fixed bottom-6 right-6 ${colors[type] || colors.info} text-white px-4 py-2 rounded-lg shadow-lg text-sm z-50`;
+  toast.style.animation = 'fadeIn 0.2s ease';
+  toast.textContent = msg;
+  document.body.appendChild(toast);
+  setTimeout(() => { toast.style.opacity = '0'; toast.style.transition = 'opacity 0.3s'; }, 2500);
+  setTimeout(() => toast.remove(), 3000);
 }
 
 // ─── Init ───────────────────────────────────────────────────────────

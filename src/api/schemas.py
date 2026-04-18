@@ -103,3 +103,42 @@ class UploadResponse(BaseModel):
     skills: List[str]
     total_years_experience: Optional[float]
     message: str
+
+
+# ─── Pipeline / Kanban ────────────────────────────────────────────
+class PipelineCard(BaseModel):
+    application_id: int
+    candidate_id: int
+    candidate_name: Optional[str]
+    category: Optional[str]
+    skills: List[str] = []
+    total_years_experience: Optional[float] = None
+    match_score: Optional[float] = None
+    stage: str
+    notes: Optional[str] = None
+
+
+class PipelineColumn(BaseModel):
+    stage: str
+    label: str
+    count: int
+    cards: List[PipelineCard]
+
+
+class PipelineResponse(BaseModel):
+    job_id: int
+    job_title: str
+    columns: List[PipelineColumn]
+    total: int
+
+
+class StageUpdateRequest(BaseModel):
+    stage: str
+
+
+class ApplicationCreateRequest(BaseModel):
+    candidate_id: int
+    job_role_id: int
+    stage: str = "applied"
+    match_score: Optional[float] = None
+    notes: Optional[str] = None

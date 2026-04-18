@@ -26,6 +26,40 @@
     .provider-btn:hover { border-color: #a5b4fc; color: #4f46e5; }
     .provider-btn.active { background: #6366f1; color: white; border-color: #6366f1; box-shadow: 0 1px 4px rgba(99,102,241,0.3); }
     .provider-btn.active:hover { background: #4f46e5; }
+    /* Kanban Pipeline Board */
+    .kanban-board { display: flex; gap: 12px; overflow-x: auto; padding-bottom: 12px; }
+    .kanban-col { flex: 0 0 280px; min-width: 280px; background: #f3f4f6; border-radius: 12px; padding: 12px; display: flex; flex-direction: column; max-height: calc(100vh - 280px); }
+    .kanban-col-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 10px; padding: 0 4px; }
+    .kanban-col-title { font-weight: 600; font-size: 13px; color: #374151; display: flex; align-items: center; gap: 6px; }
+    .kanban-count { background: white; color: #6b7280; font-size: 11px; font-weight: 600; padding: 2px 8px; border-radius: 10px; border: 1px solid #e5e7eb; }
+    .kanban-col-body { flex: 1; overflow-y: auto; display: flex; flex-direction: column; gap: 8px; min-height: 60px; padding: 4px; border-radius: 8px; transition: background 0.2s; }
+    .kanban-col-body.drag-over { background: rgba(99,102,241,0.08); border: 2px dashed #a5b4fc; }
+    .kanban-card { background: white; border-radius: 8px; padding: 12px; cursor: grab; border: 1px solid #e5e7eb; box-shadow: 0 1px 2px rgba(0,0,0,0.04); transition: box-shadow 0.15s, transform 0.15s; }
+    .kanban-card:hover { box-shadow: 0 2px 8px rgba(0,0,0,0.08); }
+    .kanban-card.dragging { opacity: 0.4; cursor: grabbing; transform: scale(0.98); }
+    .kanban-card .card-name { font-weight: 600; font-size: 13px; color: #1f2937; margin-bottom: 4px; line-height: 1.3; }
+    .kanban-card .card-meta { font-size: 11px; color: #6b7280; margin-bottom: 6px; }
+    .kanban-card .card-skills { display: flex; flex-wrap: wrap; gap: 3px; margin-top: 6px; }
+    .kanban-card .card-skill { background: #eef2ff; color: #4f46e5; font-size: 10px; padding: 1px 6px; border-radius: 4px; }
+    .kanban-card .card-footer { display: flex; justify-content: space-between; align-items: center; margin-top: 8px; padding-top: 8px; border-top: 1px solid #f3f4f6; }
+    .kanban-card .card-score { font-size: 10px; font-weight: 600; padding: 2px 6px; border-radius: 4px; }
+    .kanban-card .card-delete { font-size: 11px; color: #9ca3af; cursor: pointer; }
+    .kanban-card .card-delete:hover { color: #ef4444; }
+    .kanban-empty { color: #9ca3af; font-size: 12px; text-align: center; padding: 16px 8px; font-style: italic; }
+    /* Stage color strips */
+    .stage-applied   { border-top: 3px solid #6366f1; }
+    .stage-screened  { border-top: 3px solid #0ea5e9; }
+    .stage-interview { border-top: 3px solid #f59e0b; }
+    .stage-offer     { border-top: 3px solid #8b5cf6; }
+    .stage-hired     { border-top: 3px solid #10b981; }
+    .stage-rejected  { border-top: 3px solid #ef4444; }
+    .dot-applied   { background: #6366f1; }
+    .dot-screened  { background: #0ea5e9; }
+    .dot-interview { background: #f59e0b; }
+    .dot-offer     { background: #8b5cf6; }
+    .dot-hired     { background: #10b981; }
+    .dot-rejected  { background: #ef4444; }
+    .stage-dot { width: 8px; height: 8px; border-radius: 50%; display: inline-block; }
     /* Mobile sidebar */
     #sidebar-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.4); z-index: 40; }
     #sidebar-overlay.active { display: block; }
@@ -76,6 +110,9 @@
       </a>
       <a href="#" data-page="matching" class="sidebar-link flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium text-gray-600">
         <i data-lucide="git-compare-arrows" class="w-4 h-4"></i> Matching
+      </a>
+      <a href="#" data-page="pipeline" class="sidebar-link flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium text-gray-600">
+        <i data-lucide="kanban-square" class="w-4 h-4"></i> Pipeline
       </a>
       <a href="#" data-page="query" class="sidebar-link flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium text-gray-600">
         <i data-lucide="database" class="w-4 h-4"></i> SQL Query
@@ -240,6 +277,32 @@
       <div id="match-results"></div>
     </div>
 
+    <!-- Pipeline (Kanban) Page -->
+    <div id="page-pipeline" class="page fade-in">
+      <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-6">
+        <div>
+          <h2 class="text-2xl font-bold">Candidate Pipeline</h2>
+          <p class="text-sm text-gray-500 mt-0.5">Drag cards between stages · <span id="pipeline-total">0</span> candidates in pipeline</p>
+        </div>
+        <div class="flex gap-2">
+          <button onclick="seedPipelineFromMatches()" id="pipeline-seed-btn" class="text-xs border border-indigo-200 text-indigo-600 px-3 py-1.5 rounded-lg hover:bg-indigo-50 flex items-center gap-1.5">
+            <i data-lucide="sparkles" class="w-3.5 h-3.5"></i> Add top 10 matches
+          </button>
+          <button onclick="loadPipeline()" class="text-xs border border-gray-200 text-gray-500 px-3 py-1.5 rounded-lg hover:bg-gray-100 flex items-center gap-1.5">
+            <i data-lucide="refresh-cw" class="w-3.5 h-3.5"></i> Refresh
+          </button>
+        </div>
+      </div>
+
+      <div class="card bg-white rounded-xl p-4 border border-gray-100 mb-5">
+        <label class="block text-xs font-medium text-gray-600 mb-2">Select Job Role</label>
+        <select id="pipeline-job-select" onchange="loadPipeline()" class="w-full border border-gray-200 rounded-lg px-4 py-2.5 text-sm bg-white focus:ring-2 focus:ring-indigo-200 focus:border-indigo-400 outline-none"></select>
+      </div>
+
+      <div id="pipeline-loading" class="hidden text-center py-8"><div class="loader"></div><p class="text-sm text-gray-500 mt-3">Loading pipeline...</p></div>
+      <div id="pipeline-board" class="kanban-board"></div>
+    </div>
+
     <!-- Query Page -->
     <div id="page-query" class="page fade-in">
       <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-6">
@@ -379,7 +442,7 @@
   </main>
 </div>
 
-<script src="/static/js/app.js?v=6"></script>
+<script src="/static/js/app.js?v=8"></script>
 <script>
   lucide.createIcons();
   function toggleSidebar() {
