@@ -864,6 +864,77 @@ def create_application(payload: ApplicationCreateRequest):
         session.close()
 
 
+@app.post("/applications/bulk", tags=["Pipeline"])
+def create_applications_bulk(payload: list[ApplicationCreateRequest]):
+    """Bulk-add candidates to a job's pipeline in a single request.
+
+    Used by the 'Add top 10 matches' quick action to avoid rate-limit thrash
+    from 10 sequential POSTs.
+    """
+    if not payload:
+        raise HTTPException(status_code=400, detail="Empty payload")
+    if len(payload) > 100:
+        raise HTTPException(status_code=400, detail="Max 100 applications per bulk request")
+
+    session = SessionLocal()
+    added, duplicates, errors = 0, 0, []
+    try:
+        # Prefetch existing (candidate_id, job_role_id) pairs to skip dups efficiently
+        job_ids = {p.job_role_id for p in payload}
+        cand_ids = {p.candidate_id for p in payload}
+        existing_pairs = {
+            (row.candidate_id, row.job_role_id)
+            for row in session.query(Application)
+                .filter(Application.job_role_id.in_(job_ids))
+                .filter(Application.candidate_id.in_(cand_ids))
+                .all()
+        }
+
+        # Also validate candidates/jobs exist in one query each
+        valid_cands = {
+            row.id for row in session.query(Candidate.id).filter(Candidate.id.in_(cand_ids)).all()
+        }
+        valid_jobs = {
+            row.id for row in session.query(JobRole.id).filter(JobRole.id.in_(job_ids)).all()
+        }
+
+        for item in payload:
+            stage = (item.stage or "applied").lower()
+            if stage not in VALID_STAGES:
+                errors.append({"candidate_id": item.candidate_id, "error": f"invalid stage '{stage}'"})
+                continue
+            if item.candidate_id not in valid_cands:
+                errors.append({"candidate_id": item.candidate_id, "error": "candidate not found"})
+                continue
+            if item.job_role_id not in valid_jobs:
+                errors.append({"candidate_id": item.candidate_id, "error": "job not found"})
+                continue
+            if (item.candidate_id, item.job_role_id) in existing_pairs:
+                duplicates += 1
+                continue
+
+            notes = sanitize_text(item.notes, max_length=MAX_FIELD_LENGTH) if item.notes else None
+            session.add(Application(
+                candidate_id=item.candidate_id,
+                job_role_id=item.job_role_id,
+                match_score=item.match_score,
+                status=stage,
+                notes=notes,
+            ))
+            existing_pairs.add((item.candidate_id, item.job_role_id))
+            added += 1
+
+        session.commit()
+        return {
+            "added": added,
+            "duplicates": duplicates,
+            "errors": errors,
+            "total_requested": len(payload),
+        }
+    finally:
+        session.close()
+
+
 @app.patch("/applications/{application_id}/stage", tags=["Pipeline"])
 def update_application_stage(application_id: int, payload: StageUpdateRequest):
     """Move a candidate card to a different pipeline stage (drag-drop target)."""

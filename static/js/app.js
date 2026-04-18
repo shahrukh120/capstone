@@ -855,32 +855,54 @@ async function addToPipeline(candidateId, jobId, matchScore) {
 async function seedPipelineFromMatches() {
   const sel = document.getElementById('pipeline-job-select');
   if (!sel || !sel.value) return;
-  const jobId = sel.value;
+  const jobId = parseInt(sel.value);
   const btn = document.getElementById('pipeline-seed-btn');
   const orig = btn ? btn.innerHTML : '';
-  if (btn) { btn.disabled = true; btn.innerHTML = 'Adding...'; }
+  if (btn) {
+    btn.disabled = true;
+    btn.style.opacity = '0.6';
+    btn.innerHTML = '<span class="loader" style="width:12px;height:12px;border-width:2px;vertical-align:middle;margin-right:6px"></span> Adding top 10...';
+  }
+  // Also show the main pipeline loader
+  show('pipeline-loading');
+
   try {
+    // 1) Fetch top 10 matches
     const data = await api(`/match/${jobId}?top_k=10`);
-    let added = 0, dup = 0;
-    for (const m of data.matches) {
-      const res = await api('/applications', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          candidate_id: m.candidate_id,
-          job_role_id: parseInt(jobId),
-          stage: 'applied',
-          match_score: m.match_score,
-        }),
-      });
-      if (res.duplicate) dup++; else added++;
+    if (!data.matches?.length) {
+      showToast('No matches found for this job', 'warn');
+      return;
     }
-    showToast(`Added ${added} new · ${dup} already present`, 'success');
+
+    // 2) One bulk POST — avoids rate-limit thrash
+    const bulkPayload = data.matches.map(m => ({
+      candidate_id: m.candidate_id,
+      job_role_id: jobId,
+      stage: 'applied',
+      match_score: m.match_score,
+    }));
+    const res = await api('/applications/bulk', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(bulkPayload),
+    });
+
+    const msg = `Added ${res.added} new · ${res.duplicates} already in pipeline` +
+                (res.errors?.length ? ` · ${res.errors.length} failed` : '');
+    showToast(msg, res.added > 0 ? 'success' : 'warn');
+
+    // 3) Refresh board
     await loadPipeline();
   } catch (err) {
+    hide('pipeline-loading');
     showToast('Failed: ' + err.message, 'error');
   } finally {
-    if (btn) { btn.disabled = false; btn.innerHTML = orig; lucide.createIcons(); }
+    if (btn) {
+      btn.disabled = false;
+      btn.style.opacity = '';
+      btn.innerHTML = orig;
+      lucide.createIcons();
+    }
   }
 }
 
