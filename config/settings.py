@@ -25,10 +25,20 @@ class Settings(BaseSettings):
     data_dir: Path = Path(__file__).resolve().parent.parent / "data"
     parsed_dir: Path = Path(__file__).resolve().parent.parent / "parsed_resumes"
 
+    # SMTP (read directly via os.environ in src/communication/email_sender.py;
+    # declared here so pydantic-settings doesn't reject them from .env)
+    smtp_host: str = ""
+    smtp_port: int = 587
+    smtp_user: str = ""
+    smtp_password: str = ""
+    smtp_from: str = ""
+    smtp_use_tls: bool = True
+
     class Config:
         # Only load .env if it exists (not in Docker/Azure)
         env_file = ".env" if os.path.exists(".env") else None
         env_file_encoding = "utf-8"
+        extra = "ignore"  # tolerate extra env vars (don't fail on unknown keys)
 
 
 settings = Settings()

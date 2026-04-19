@@ -46,6 +46,7 @@ from src.guardrails.input_validator import (
     MAX_QUERY_LENGTH, MAX_FIELD_LENGTH,
 )
 from src.guardrails.prompt_guard import detect_prompt_injection
+from src.guardrails.resume_validator import looks_like_resume
 from src.guardrails.rate_limiter import api_limiter, llm_limiter, upload_limiter
 from src.guardrails.pii_detector import redact_pii
 
@@ -256,7 +257,7 @@ async def upload_resume(
     category: str = Query(default="GENERAL", description="Job category for the resume"),
 ):
     """Upload a resume PDF, parse with LLM, and store in database."""
-    if not file.filename.endswith(".pdf"):
+    if not file.filename.lower().endswith(".pdf"):
         raise HTTPException(status_code=400, detail="Only PDF files are accepted")
 
     # Guardrail: validate category
@@ -271,13 +272,41 @@ async def upload_resume(
         valid, err = validate_file_size(len(content))
         if not valid:
             raise HTTPException(status_code=400, detail=err)
+        # Guardrail: PDF magic bytes — reject if file isn't actually a PDF
+        if not content.startswith(b"%PDF-"):
+            raise HTTPException(
+                status_code=400,
+                detail="File is not a valid PDF (missing %PDF- magic header). "
+                       "It may be renamed/corrupted.",
+            )
         tmp.write(content)
         tmp_path = tmp.name
 
     try:
         raw_text = extract_text_from_pdf(tmp_path)
+        # Postgres TEXT columns reject NUL (0x00) bytes — strip defensively
+        raw_text = raw_text.replace("\x00", "") if raw_text else raw_text
         if not raw_text.strip():
-            raise HTTPException(status_code=400, detail="Could not extract text from PDF")
+            raise HTTPException(status_code=400, detail="Could not extract text from PDF (image-only or encrypted?)")
+
+        # Guardrail: heuristic — does this look like a resume at all?
+        ok, reason, details = looks_like_resume(raw_text)
+        logger.info(f"Resume validation for {file.filename}: ok={ok} score={details.get('score')} signals={details.get('signals')}")
+        if not ok:
+            raise HTTPException(
+                status_code=422,
+                detail=f"Rejected: this PDF doesn't look like a resume. {reason}",
+            )
+
+        # Guardrail: scan raw_text for prompt-injection attempts BEFORE sending to LLM
+        injection_detected, injection_reason = detect_prompt_injection(raw_text)
+        if injection_detected:
+            logger.warning(f"Prompt injection in resume {file.filename}: {injection_reason}")
+            raise HTTPException(
+                status_code=422,
+                detail=f"Rejected: resume contains suspicious instructions that look like an attempt to manipulate the AI parser ({injection_reason}). "
+                       "Please remove any 'ignore previous instructions' / system-prompt-style text and re-upload.",
+            )
 
         file_name = file.filename.replace(".pdf", "")
 
@@ -286,6 +315,20 @@ async def upload_resume(
         except Exception as e:
             logger.error(f"LLM parse failed: {e}")
             raise HTTPException(status_code=503, detail=f"LLM service error: {str(e)}")
+
+        # Defensive: remove NUL bytes from any LLM-returned strings too
+        def _clean(v):
+            if isinstance(v, str): return v.replace("\x00", "")
+            if isinstance(v, list): return [_clean(x) for x in v]
+            if isinstance(v, dict): return {k: _clean(x) for k, x in v.items()}
+            return v
+        resume_data.name = _clean(resume_data.name)
+        resume_data.email = _clean(resume_data.email)
+        resume_data.phone = _clean(resume_data.phone)
+        resume_data.summary = _clean(resume_data.summary)
+        resume_data.skills = _clean(resume_data.skills) or []
+        resume_data.experience = _clean(resume_data.experience) or []
+        resume_data.education = _clean(resume_data.education) or []
 
         # Build embedding text from parsed data
         embed_text_input = (resume_data.summary or "") + " Skills: " + ", ".join(resume_data.skills)
