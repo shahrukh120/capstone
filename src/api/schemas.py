@@ -142,3 +142,38 @@ class ApplicationCreateRequest(BaseModel):
     stage: str = "applied"
     match_score: Optional[float] = None
     notes: Optional[str] = None
+
+
+# ─── Communication / Email ────────────────────────────────────────
+class ContactResponse(BaseModel):
+    candidate_id: int
+    candidate_name: Optional[str]
+    email: Optional[str]
+    phone: Optional[str]
+    has_email: bool
+
+
+class EmailSendRequest(BaseModel):
+    subject: str
+    body: str
+    to_override: Optional[str] = None  # recruiter can override candidate email
+
+
+class InterviewInviteRequest(BaseModel):
+    job_id: int
+    company_name: Optional[str] = "Our Team"
+    meeting_link: Optional[str] = None        # Google Meet / Teams link (recruiter-provided)
+    meeting_datetime: Optional[str] = None    # e.g. "Monday, Nov 25 at 3pm IST"
+    interviewer_name: Optional[str] = None
+    custom_message: Optional[str] = None
+    auto_jitsi: bool = False                  # if true + no meeting_link, auto-generate Jitsi room
+    to_override: Optional[str] = None
+
+
+class EmailResponse(BaseModel):
+    ok: bool
+    message: str
+    to: Optional[str] = None
+    subject: Optional[str] = None
+    meeting_link: Optional[str] = None
+    meeting_link_source: Optional[str] = None

@@ -209,7 +209,13 @@ async function loadCandidates() {
           <div class="ml-12">${skillTags(c.skills, 6)}</div>
         </div>
         <div class="flex gap-2 ml-4">
-          <button onclick="document.getElementById('interview-candidate').value=${c.id}; navigateTo('interview')" class="text-xs bg-gray-100 text-gray-600 px-3 py-1.5 rounded-lg hover:bg-gray-200" title="Interview">
+          <button onclick="openEmailModal(${c.id}, 'invite')" class="text-xs bg-indigo-50 text-indigo-700 px-3 py-1.5 rounded-lg hover:bg-indigo-100" title="Schedule Interview / Send Invite">
+            <i data-lucide="calendar-plus" class="w-3.5 h-3.5 inline"></i>
+          </button>
+          <button onclick="openEmailModal(${c.id}, 'plain')" class="text-xs bg-gray-100 text-gray-600 px-3 py-1.5 rounded-lg hover:bg-gray-200" title="Send Email">
+            <i data-lucide="mail" class="w-3.5 h-3.5 inline"></i>
+          </button>
+          <button onclick="document.getElementById('interview-candidate').value=${c.id}; navigateTo('interview')" class="text-xs bg-gray-100 text-gray-600 px-3 py-1.5 rounded-lg hover:bg-gray-200" title="Interview Questions">
             <i data-lucide="message-square-text" class="w-3.5 h-3.5 inline"></i>
           </button>
           <button onclick="document.getElementById('explain-candidate').value=${c.id}; navigateTo('bias')" class="text-xs bg-gray-100 text-gray-600 px-3 py-1.5 rounded-lg hover:bg-gray-200" title="Explain">
@@ -757,7 +763,15 @@ function renderKanbanCard(c) {
       <div class="card-skills">${skills}</div>
       <div class="card-footer">
         ${score || '<span class="text-[10px] text-gray-400">No score</span>'}
-        <span class="card-delete" onclick="removeFromPipeline(${c.application_id}, event)" title="Remove from pipeline">✕</span>
+        <div class="flex items-center gap-1">
+          <button class="text-[11px] text-indigo-600 hover:bg-indigo-50 rounded px-1.5 py-0.5" onclick="event.stopPropagation(); openEmailModal(${c.candidate_id}, 'invite')" title="Send interview invite">
+            <i data-lucide="calendar-plus" class="w-3 h-3 inline"></i>
+          </button>
+          <button class="text-[11px] text-gray-500 hover:bg-gray-100 rounded px-1.5 py-0.5" onclick="event.stopPropagation(); openEmailModal(${c.candidate_id}, 'plain')" title="Send email">
+            <i data-lucide="mail" class="w-3 h-3 inline"></i>
+          </button>
+          <span class="card-delete" onclick="removeFromPipeline(${c.application_id}, event)" title="Remove from pipeline">✕</span>
+        </div>
       </div>
     </div>`;
 }
@@ -920,6 +934,155 @@ function showToast(msg, type = 'info') {
   document.body.appendChild(toast);
   setTimeout(() => { toast.style.opacity = '0'; toast.style.transition = 'opacity 0.3s'; }, 2500);
   setTimeout(() => toast.remove(), 3000);
+}
+
+// ─── Email / Interview Invite Modal ─────────────────────────────────
+let emailModalState = { candidateId: null, mode: 'plain', contact: null, smtpOk: false };
+
+async function openEmailModal(candidateId, mode = 'plain') {
+  emailModalState.candidateId = candidateId;
+  emailModalState.mode = mode;
+
+  // Reset fields
+  document.getElementById('email-to').value = '';
+  document.getElementById('email-subject').value = '';
+  document.getElementById('email-body').value = '';
+  document.getElementById('invite-datetime').value = '';
+  document.getElementById('invite-link').value = '';
+  document.getElementById('invite-interviewer').value = '';
+  document.getElementById('invite-custom').value = '';
+  document.getElementById('invite-company').value = 'Our Team';
+  document.getElementById('email-status').textContent = '';
+  document.getElementById('email-resolved-to').textContent = 'Loading…';
+
+  show('email-modal');
+  switchEmailMode(mode);
+
+  // Fetch contact + SMTP status + jobs in parallel
+  try {
+    const [contact, status, jobs] = await Promise.all([
+      api(`/candidates/${candidateId}/contact`),
+      api('/communication/status'),
+      api('/jobs'),
+    ]);
+    emailModalState.contact = contact;
+    emailModalState.smtpOk = !!status.smtp_configured;
+
+    document.getElementById('email-modal-subtitle').textContent =
+      `To: ${contact.candidate_name || 'Unknown'} (${contact.email || 'no email on file'})`;
+    document.getElementById('email-resolved-to').textContent = contact.email
+      ? `Will send to: ${contact.email}` : 'No email on file — provide an override above.';
+    document.getElementById('email-to').placeholder = contact.email || 'Enter recipient email…';
+
+    document.getElementById('email-smtp-warning').classList.toggle('hidden', emailModalState.smtpOk);
+
+    // Default subject/body
+    const name = contact.candidate_name || 'there';
+    document.getElementById('email-subject').value = `Following up — ${name}`;
+    document.getElementById('email-body').value =
+      `Hi ${name},\n\nThanks for your interest. We'd like to continue the conversation about your application.\n\nBest regards,\nRecruitment Team`;
+
+    // Populate jobs dropdown
+    const sel = document.getElementById('invite-job');
+    sel.innerHTML = jobs.map(j => `<option value="${j.id}">${escapeHtml(j.title)}${j.department ? ' — ' + escapeHtml(j.department) : ''}</option>`).join('');
+
+    lucide.createIcons();
+  } catch (err) {
+    document.getElementById('email-resolved-to').textContent = 'Error loading: ' + err.message;
+  }
+}
+
+function closeEmailModal() {
+  hide('email-modal');
+}
+
+function switchEmailMode(mode) {
+  emailModalState.mode = mode;
+  const plain = mode === 'plain';
+  document.getElementById('email-mode-plain').classList.toggle('hidden', !plain);
+  document.getElementById('email-mode-invite').classList.toggle('hidden', plain);
+  document.getElementById('email-tab-plain').className = plain
+    ? 'px-3 py-2 text-sm font-medium border-b-2 border-indigo-600 text-indigo-600'
+    : 'px-3 py-2 text-sm font-medium border-b-2 border-transparent text-gray-500 hover:text-gray-700';
+  document.getElementById('email-tab-invite').className = !plain
+    ? 'px-3 py-2 text-sm font-medium border-b-2 border-indigo-600 text-indigo-600'
+    : 'px-3 py-2 text-sm font-medium border-b-2 border-transparent text-gray-500 hover:text-gray-700';
+  document.getElementById('email-modal-title').textContent = plain ? 'Send Email' : 'Send Interview Invite';
+  document.getElementById('email-send-label').textContent = plain ? 'Send Email' : 'Send Invite';
+}
+
+async function generateJitsiLink() {
+  try {
+    const res = await api('/communication/jitsi-link', { method: 'POST' });
+    document.getElementById('invite-link').value = res.meeting_link || res.link;
+    showToast('Generated Jitsi room link', 'success');
+  } catch (err) {
+    showToast('Failed to generate link: ' + err.message, 'error');
+  }
+}
+
+async function sendEmailFromModal() {
+  const btn = document.getElementById('email-send-btn');
+  const spinner = document.getElementById('email-send-spinner');
+  const status = document.getElementById('email-status');
+  const cid = emailModalState.candidateId;
+  if (!cid) return;
+
+  btn.disabled = true;
+  spinner.classList.remove('hidden');
+  status.textContent = 'Sending…';
+  status.className = 'text-xs text-gray-500 mr-auto';
+
+  const toOverride = document.getElementById('email-to').value.trim() || null;
+
+  try {
+    let res;
+    if (emailModalState.mode === 'plain') {
+      const subject = document.getElementById('email-subject').value.trim();
+      const body = document.getElementById('email-body').value.trim();
+      if (!subject || !body) throw new Error('Subject and body required');
+      res = await api(`/candidates/${cid}/email`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ subject, body, to_override: toOverride }),
+      });
+    } else {
+      const job_id = parseInt(document.getElementById('invite-job').value, 10);
+      if (!job_id) throw new Error('Select a job role');
+      const link = document.getElementById('invite-link').value.trim() || null;
+      const payload = {
+        job_id,
+        company_name: document.getElementById('invite-company').value.trim() || 'Our Team',
+        meeting_link: link,
+        meeting_datetime: document.getElementById('invite-datetime').value.trim() || null,
+        interviewer_name: document.getElementById('invite-interviewer').value.trim() || null,
+        custom_message: document.getElementById('invite-custom').value.trim() || null,
+        auto_jitsi: !link,  // auto-generate Jitsi only if no link provided
+        to_override: toOverride,
+      };
+      res = await api(`/candidates/${cid}/interview-invite`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload),
+      });
+    }
+
+    if (res.ok) {
+      status.textContent = `✓ Sent to ${res.to}`;
+      status.className = 'text-xs text-emerald-600 mr-auto';
+      showToast('Email sent successfully', 'success');
+      setTimeout(closeEmailModal, 1200);
+    } else {
+      throw new Error(res.message || 'Send failed');
+    }
+  } catch (err) {
+    status.textContent = '✗ ' + err.message;
+    status.className = 'text-xs text-red-600 mr-auto';
+    showToast('Failed: ' + err.message, 'error');
+  } finally {
+    btn.disabled = false;
+    spinner.classList.add('hidden');
+  }
 }
 
 // ─── Init ───────────────────────────────────────────────────────────

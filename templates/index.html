@@ -442,7 +442,100 @@
   </main>
 </div>
 
-<script src="/static/js/app.js?v=8"></script>
+<!-- ── Email / Interview Invite Modal ─────────────────────────── -->
+<div id="email-modal" class="hidden fixed inset-0 z-50 bg-black/50 flex items-center justify-center p-4">
+  <div class="bg-white rounded-xl shadow-2xl w-full max-w-2xl max-h-[90vh] overflow-y-auto">
+    <div class="p-5 border-b border-gray-100 flex items-center justify-between sticky top-0 bg-white">
+      <div>
+        <h3 id="email-modal-title" class="text-lg font-semibold text-gray-800">Send Email</h3>
+        <p id="email-modal-subtitle" class="text-xs text-gray-500 mt-0.5">To: —</p>
+      </div>
+      <button onclick="closeEmailModal()" class="text-gray-400 hover:text-gray-600 text-xl leading-none">&times;</button>
+    </div>
+    <div class="p-5 space-y-4">
+      <!-- Mode tabs -->
+      <div class="flex gap-2 border-b border-gray-100">
+        <button id="email-tab-plain" onclick="switchEmailMode('plain')" class="px-3 py-2 text-sm font-medium border-b-2 border-indigo-600 text-indigo-600">Plain Email</button>
+        <button id="email-tab-invite" onclick="switchEmailMode('invite')" class="px-3 py-2 text-sm font-medium border-b-2 border-transparent text-gray-500 hover:text-gray-700">Interview Invite</button>
+      </div>
+
+      <div id="email-smtp-warning" class="hidden text-xs bg-amber-50 border border-amber-200 text-amber-800 rounded-lg px-3 py-2">
+        <i data-lucide="alert-triangle" class="w-3.5 h-3.5 inline"></i>
+        SMTP not configured. Set <code>SMTP_HOST</code>, <code>SMTP_USER</code>, <code>SMTP_PASSWORD</code> env vars.
+      </div>
+
+      <div>
+        <label class="text-xs font-medium text-gray-600">Recipient (override)</label>
+        <input id="email-to" type="email" placeholder="leave blank to use candidate's email" class="w-full mt-1 px-3 py-2 text-sm border border-gray-200 rounded-lg focus:ring-2 focus:ring-indigo-100 focus:border-indigo-400 outline-none" />
+        <p id="email-resolved-to" class="text-[11px] text-gray-400 mt-1"></p>
+      </div>
+
+      <!-- ── Plain mode ── -->
+      <div id="email-mode-plain" class="space-y-3">
+        <div>
+          <label class="text-xs font-medium text-gray-600">Subject</label>
+          <input id="email-subject" type="text" class="w-full mt-1 px-3 py-2 text-sm border border-gray-200 rounded-lg focus:ring-2 focus:ring-indigo-100 focus:border-indigo-400 outline-none" />
+        </div>
+        <div>
+          <label class="text-xs font-medium text-gray-600">Body</label>
+          <textarea id="email-body" rows="8" class="w-full mt-1 px-3 py-2 text-sm border border-gray-200 rounded-lg focus:ring-2 focus:ring-indigo-100 focus:border-indigo-400 outline-none font-mono"></textarea>
+        </div>
+      </div>
+
+      <!-- ── Invite mode ── -->
+      <div id="email-mode-invite" class="hidden space-y-3">
+        <div class="grid grid-cols-2 gap-3">
+          <div>
+            <label class="text-xs font-medium text-gray-600">Job Role</label>
+            <select id="invite-job" class="w-full mt-1 px-3 py-2 text-sm border border-gray-200 rounded-lg outline-none focus:border-indigo-400"></select>
+          </div>
+          <div>
+            <label class="text-xs font-medium text-gray-600">Company Name</label>
+            <input id="invite-company" type="text" value="Our Team" class="w-full mt-1 px-3 py-2 text-sm border border-gray-200 rounded-lg outline-none focus:border-indigo-400" />
+          </div>
+        </div>
+        <div>
+          <label class="text-xs font-medium text-gray-600">Meeting Date/Time</label>
+          <input id="invite-datetime" type="text" placeholder="e.g. Monday, Nov 25 at 3:00pm IST" class="w-full mt-1 px-3 py-2 text-sm border border-gray-200 rounded-lg outline-none focus:border-indigo-400" />
+        </div>
+        <div>
+          <label class="text-xs font-medium text-gray-600">Meeting Link</label>
+          <div class="flex gap-2 mt-1">
+            <input id="invite-link" type="url" placeholder="https://meet.google.com/... or Teams URL" class="flex-1 px-3 py-2 text-sm border border-gray-200 rounded-lg outline-none focus:border-indigo-400" />
+            <button onclick="generateJitsiLink()" type="button" class="text-xs bg-indigo-50 text-indigo-700 px-3 py-2 rounded-lg hover:bg-indigo-100 whitespace-nowrap" title="Generate free Jitsi room (no auth needed)">
+              <i data-lucide="video" class="w-3.5 h-3.5 inline"></i> Auto Jitsi
+            </button>
+          </div>
+          <p class="text-[11px] text-gray-400 mt-1">Paste your Google Meet / MS Teams URL, or click "Auto Jitsi" for an instant free room.</p>
+        </div>
+        <div>
+          <label class="text-xs font-medium text-gray-600">Interviewer Name (optional)</label>
+          <input id="invite-interviewer" type="text" class="w-full mt-1 px-3 py-2 text-sm border border-gray-200 rounded-lg outline-none focus:border-indigo-400" />
+        </div>
+        <div>
+          <label class="text-xs font-medium text-gray-600">Custom Message (optional)</label>
+          <textarea id="invite-custom" rows="3" placeholder="Add anything specific you want the candidate to know..." class="w-full mt-1 px-3 py-2 text-sm border border-gray-200 rounded-lg outline-none focus:border-indigo-400"></textarea>
+        </div>
+      </div>
+    </div>
+    <div class="p-5 border-t border-gray-100 flex items-center justify-end gap-2 sticky bottom-0 bg-white">
+      <span id="email-status" class="text-xs text-gray-500 mr-auto"></span>
+      <button onclick="closeEmailModal()" class="text-sm px-4 py-2 rounded-lg text-gray-600 hover:bg-gray-100">Cancel</button>
+      <button id="email-send-btn" onclick="sendEmailFromModal()" class="text-sm px-4 py-2 rounded-lg bg-indigo-600 text-white hover:bg-indigo-700 flex items-center gap-2">
+        <span id="email-send-spinner" class="hidden loader-sm"></span>
+        <i data-lucide="send" class="w-3.5 h-3.5"></i>
+        <span id="email-send-label">Send</span>
+      </button>
+    </div>
+  </div>
+</div>
+
+<style>
+  .loader-sm { display:inline-block; width:12px; height:12px; border:2px solid #fff; border-top-color:transparent; border-radius:50%; animation:spin 0.7s linear infinite; }
+  @keyframes spin { to { transform: rotate(360deg); } }
+</style>
+
+<script src="/static/js/app.js?v=9"></script>
 <script>
   lucide.createIcons();
   function toggleSidebar() {

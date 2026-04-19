@@ -22,6 +22,11 @@ from src.api.schemas import (
     UploadResponse, JobCreateRequest,
     PipelineResponse, PipelineColumn, PipelineCard,
     StageUpdateRequest, ApplicationCreateRequest,
+    ContactResponse, EmailSendRequest, InterviewInviteRequest, EmailResponse,
+)
+from src.communication import (
+    send_email, send_interview_invite, generate_jitsi_link,
+    is_valid_email, SMTP_CONFIGURED,
 )
 from src.parser.pdf_extractor import extract_text_from_pdf
 from src.parser.llm_parser import parse_resume_with_llm
@@ -41,6 +46,7 @@ from src.guardrails.input_validator import (
     MAX_QUERY_LENGTH, MAX_FIELD_LENGTH,
 )
 from src.guardrails.prompt_guard import detect_prompt_injection
+from src.guardrails.resume_validator import looks_like_resume
 from src.guardrails.rate_limiter import api_limiter, llm_limiter, upload_limiter
 from src.guardrails.pii_detector import redact_pii
 
@@ -251,7 +257,7 @@ async def upload_resume(
     category: str = Query(default="GENERAL", description="Job category for the resume"),
 ):
     """Upload a resume PDF, parse with LLM, and store in database."""
-    if not file.filename.endswith(".pdf"):
+    if not file.filename.lower().endswith(".pdf"):
         raise HTTPException(status_code=400, detail="Only PDF files are accepted")
 
     # Guardrail: validate category
@@ -266,13 +272,41 @@ async def upload_resume(
         valid, err = validate_file_size(len(content))
         if not valid:
             raise HTTPException(status_code=400, detail=err)
+        # Guardrail: PDF magic bytes — reject if file isn't actually a PDF
+        if not content.startswith(b"%PDF-"):
+            raise HTTPException(
+                status_code=400,
+                detail="File is not a valid PDF (missing %PDF- magic header). "
+                       "It may be renamed/corrupted.",
+            )
         tmp.write(content)
         tmp_path = tmp.name
 
     try:
         raw_text = extract_text_from_pdf(tmp_path)
+        # Postgres TEXT columns reject NUL (0x00) bytes — strip defensively
+        raw_text = raw_text.replace("\x00", "") if raw_text else raw_text
         if not raw_text.strip():
-            raise HTTPException(status_code=400, detail="Could not extract text from PDF")
+            raise HTTPException(status_code=400, detail="Could not extract text from PDF (image-only or encrypted?)")
+
+        # Guardrail: heuristic — does this look like a resume at all?
+        ok, reason, details = looks_like_resume(raw_text)
+        logger.info(f"Resume validation for {file.filename}: ok={ok} score={details.get('score')} signals={details.get('signals')}")
+        if not ok:
+            raise HTTPException(
+                status_code=422,
+                detail=f"Rejected: this PDF doesn't look like a resume. {reason}",
+            )
+
+        # Guardrail: scan raw_text for prompt-injection attempts BEFORE sending to LLM
+        injection_detected, injection_reason = detect_prompt_injection(raw_text)
+        if injection_detected:
+            logger.warning(f"Prompt injection in resume {file.filename}: {injection_reason}")
+            raise HTTPException(
+                status_code=422,
+                detail=f"Rejected: resume contains suspicious instructions that look like an attempt to manipulate the AI parser ({injection_reason}). "
+                       "Please remove any 'ignore previous instructions' / system-prompt-style text and re-upload.",
+            )
 
         file_name = file.filename.replace(".pdf", "")
 
@@ -281,6 +315,20 @@ async def upload_resume(
         except Exception as e:
             logger.error(f"LLM parse failed: {e}")
             raise HTTPException(status_code=503, detail=f"LLM service error: {str(e)}")
+
+        # Defensive: remove NUL bytes from any LLM-returned strings too
+        def _clean(v):
+            if isinstance(v, str): return v.replace("\x00", "")
+            if isinstance(v, list): return [_clean(x) for x in v]
+            if isinstance(v, dict): return {k: _clean(x) for k, x in v.items()}
+            return v
+        resume_data.name = _clean(resume_data.name)
+        resume_data.email = _clean(resume_data.email)
+        resume_data.phone = _clean(resume_data.phone)
+        resume_data.summary = _clean(resume_data.summary)
+        resume_data.skills = _clean(resume_data.skills) or []
+        resume_data.experience = _clean(resume_data.experience) or []
+        resume_data.education = _clean(resume_data.education) or []
 
         # Build embedding text from parsed data
         embed_text_input = (resume_data.summary or "") + " Skills: " + ", ".join(resume_data.skills)
@@ -974,5 +1022,160 @@ def delete_application(application_id: int):
         session.delete(app_row)
         session.commit()
         return {"id": application_id, "message": "Removed from pipeline"}
+    finally:
+        session.close()
+
+
+# ─── Communication: Email + Interview Invite ────────────────────────
+
+@app.get("/candidates/{candidate_id}/contact", response_model=ContactResponse, tags=["Communication"])
+def get_candidate_contact(candidate_id: int):
+    """Fetch the contact details (email, phone) for a candidate."""
+    session = SessionLocal()
+    try:
+        c = session.query(Candidate).get(candidate_id)
+        if not c:
+            raise HTTPException(status_code=404, detail=f"Candidate {candidate_id} not found")
+        return ContactResponse(
+            candidate_id=c.id,
+            candidate_name=c.name,
+            email=c.email,
+            phone=c.phone,
+            has_email=is_valid_email(c.email),
+        )
+    finally:
+        session.close()
+
+
+@app.get("/communication/status", tags=["Communication"])
+def communication_status():
+    """Check whether SMTP is configured."""
+    return {
+        "smtp_configured": SMTP_CONFIGURED,
+        "smtp_host": os.environ.get("SMTP_HOST", "") if SMTP_CONFIGURED else None,
+        "smtp_from": os.environ.get("SMTP_FROM", os.environ.get("SMTP_USER", "")) if SMTP_CONFIGURED else None,
+    }
+
+
+@app.post("/communication/jitsi-link", tags=["Communication"])
+def create_jitsi_link(prefix: Optional[str] = Query(default="ats-interview", max_length=40)):
+    """Generate a free Jitsi Meet room link (no auth, works instantly)."""
+    # Sanitise prefix: alphanumeric + dash only
+    import re as _re
+    safe_prefix = _re.sub(r"[^a-zA-Z0-9-]", "-", prefix or "ats-interview")[:40] or "ats-interview"
+    link = generate_jitsi_link(prefix=safe_prefix)
+    return {"meeting_link": link, "provider": "jitsi", "auth_required": False}
+
+
+@app.post("/candidates/{candidate_id}/email", response_model=EmailResponse, tags=["Communication"])
+def send_candidate_email(candidate_id: int, payload: EmailSendRequest):
+    """Send a plain email to a candidate (subject + body)."""
+    if not SMTP_CONFIGURED:
+        raise HTTPException(
+            status_code=503,
+            detail="Email not configured. Admin must set SMTP_HOST, SMTP_USER, SMTP_PASSWORD env vars.",
+        )
+
+    # Guardrails: sanitise + validate lengths
+    subject = sanitize_text(payload.subject, max_length=200)
+    body = sanitize_text(payload.body, max_length=5000)
+    if not subject:
+        raise HTTPException(status_code=400, detail="Subject is required")
+    if not body:
+        raise HTTPException(status_code=400, detail="Body is required")
+
+    # Prompt injection check on body (protects against malicious resume content)
+    is_injection, reason = detect_prompt_injection(body)
+    if is_injection:
+        raise HTTPException(status_code=400, detail=f"Email body blocked: {reason}")
+
+    session = SessionLocal()
+    try:
+        c = session.query(Candidate).get(candidate_id)
+        if not c:
+            raise HTTPException(status_code=404, detail=f"Candidate {candidate_id} not found")
+
+        to = (payload.to_override or c.email or "").strip()
+        if not is_valid_email(to):
+            raise HTTPException(
+                status_code=400,
+                detail=f"No valid email on file for this candidate. Got: '{to or 'empty'}'. Provide 'to_override' to send anyway.",
+            )
+
+        ok, message = send_email(to, subject, body)
+        if not ok:
+            raise HTTPException(status_code=502, detail=message)
+
+        return EmailResponse(ok=True, message=message, to=to, subject=subject)
+    finally:
+        session.close()
+
+
+@app.post("/candidates/{candidate_id}/interview-invite", response_model=EmailResponse, tags=["Communication"])
+def send_candidate_interview_invite(candidate_id: int, payload: InterviewInviteRequest):
+    """Send a templated interview invitation email with meeting link."""
+    if not SMTP_CONFIGURED:
+        raise HTTPException(
+            status_code=503,
+            detail="Email not configured. Admin must set SMTP_HOST, SMTP_USER, SMTP_PASSWORD env vars.",
+        )
+
+    session = SessionLocal()
+    try:
+        c = session.query(Candidate).get(candidate_id)
+        if not c:
+            raise HTTPException(status_code=404, detail=f"Candidate {candidate_id} not found")
+
+        job = session.query(JobRole).get(payload.job_id)
+        if not job:
+            raise HTTPException(status_code=404, detail=f"Job role {payload.job_id} not found")
+
+        to = (payload.to_override or c.email or "").strip()
+        if not is_valid_email(to):
+            raise HTTPException(
+                status_code=400,
+                detail=f"No valid email on file for this candidate. Got: '{to or 'empty'}'. Provide 'to_override' to send anyway.",
+            )
+
+        # Sanitise user-facing text
+        company = sanitize_text(payload.company_name or "Our Team", max_length=100)
+        datetime_str = sanitize_text(payload.meeting_datetime, max_length=100) if payload.meeting_datetime else None
+        interviewer = sanitize_text(payload.interviewer_name, max_length=100) if payload.interviewer_name else None
+        custom_msg = sanitize_text(payload.custom_message, max_length=1000) if payload.custom_message else None
+        link = payload.meeting_link.strip() if payload.meeting_link else None
+
+        # Validate meeting link scheme
+        if link and not (link.startswith("https://") or link.startswith("http://")):
+            raise HTTPException(status_code=400, detail="Meeting link must be a valid URL (https://...)")
+
+        # Prompt-injection guard on custom message
+        if custom_msg:
+            is_injection, reason = detect_prompt_injection(custom_msg)
+            if is_injection:
+                raise HTTPException(status_code=400, detail=f"Custom message blocked: {reason}")
+
+        ok, message, details = send_interview_invite(
+            candidate_name=c.name or "",
+            to_addr=to,
+            job_title=job.title,
+            company_name=company,
+            meeting_link=link,
+            meeting_datetime=datetime_str,
+            interviewer_name=interviewer,
+            custom_message=custom_msg,
+            auto_jitsi=payload.auto_jitsi,
+        )
+        if not ok:
+            raise HTTPException(status_code=502, detail=message)
+
+        logger.info(f"Interview invite sent: candidate={candidate_id} job={payload.job_id} to={to}")
+        return EmailResponse(
+            ok=True,
+            message=message,
+            to=details.get("to"),
+            subject=details.get("subject"),
+            meeting_link=details.get("meeting_link"),
+            meeting_link_source=details.get("meeting_link_source"),
+        )
     finally:
         session.close()
