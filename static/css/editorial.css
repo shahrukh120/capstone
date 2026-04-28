@@ -1,0 +1,424 @@
+/* =====================================================================
+   AI-ATS · Editorial Redesign
+   Direction: Bloomberg terminal × NYT opinion page.
+   Fonts:  Fraunces (display, SOFT 100, WONK), Space Grotesk (UI), JetBrains Mono (data)
+   Palette: warm bone bg, near-black ink, oxblood + mustard accents, sage muted.
+   ===================================================================== */
+
+@import url('https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght,SOFT,WONK@9..144,300..900,0..100,0..1&family=JetBrains+Mono:wght@400;500;700&family=Space+Grotesk:wght@300;400;500;600;700&display=swap');
+
+/* ── 1. Tokens ────────────────────────────────────────────────── */
+:root {
+  --bone:    #F2ECE0;
+  --paper:   #FAF6EC;
+  --mark:    #EDE2C8;
+  --ink:     #0E0E10;
+  --rule:    #2A2A2C;
+  --oxblood: #7A1E1E;
+  --mustard: #D4A24C;
+  --sage:    #5B6E58;
+  --gray-1:  #8A8478;
+  --gray-2:  #C7C0B0;
+
+  --serif: 'Fraunces', 'Times New Roman', serif;
+  --sans:  'Space Grotesk', system-ui, sans-serif;
+  --mono:  'JetBrains Mono', 'SF Mono', monospace;
+
+  --ease: cubic-bezier(.2,.8,.2,1);
+}
+
+/* ── 2. Reset bg / type defaults the template assumed ─────────── */
+html, body { background: var(--bone) !important; color: var(--ink) !important; }
+body { font-family: var(--sans) !important; font-feature-settings: "ss01","cv11"; -webkit-font-smoothing: antialiased; }
+::selection { background: var(--mustard); color: var(--ink); }
+
+/* ── 3. Curtain page-load wipe ────────────────────────────────── */
+.editorial-curtain {
+  position: fixed; inset: 0; background: var(--ink); z-index: 9999;
+  transform-origin: bottom; animation: curtainUp 700ms var(--ease) forwards;
+}
+.editorial-curtain::after {
+  content: 'AI / ATS';
+  position: absolute; inset: 0; display: flex; align-items: center; justify-content: center;
+  font-family: var(--serif); font-weight: 300; font-size: 96px; letter-spacing: -.04em;
+  color: var(--bone); opacity: .9;
+  font-variation-settings: "SOFT" 100, "WONK" 1, "opsz" 144;
+}
+@keyframes curtainUp {
+  0%   { transform: scaleY(1); }
+  60%  { transform: scaleY(1); }
+  100% { transform: scaleY(0); }
+}
+@media (prefers-reduced-motion: reduce) { .editorial-curtain { display: none; } }
+
+/* ── 4. Top ticker bar (the memorable thing) ──────────────────── */
+.ticker {
+  position: relative;
+  background: var(--rule); color: var(--bone);
+  border-bottom: 1px solid var(--ink);
+  height: 32px; overflow: hidden;
+  display: flex; align-items: center;
+  font-family: var(--mono); font-size: 11px; font-weight: 500; letter-spacing: .04em;
+  z-index: 30;
+}
+.ticker__brand {
+  background: var(--oxblood); color: var(--bone);
+  padding: 0 14px; height: 100%; display: flex; align-items: center; gap: 6px;
+  text-transform: uppercase; letter-spacing: .18em; font-weight: 700; font-size: 10px;
+  flex-shrink: 0;
+  border-right: 1px solid var(--ink);
+  position: relative; z-index: 3;            /* keep marquee text from sliding over */
+  box-shadow: 6px 0 6px -4px rgba(0,0,0,.35); /* soft fade where marquee disappears */
+}
+.ticker__track-clip {
+  flex: 1; overflow: hidden; display: flex; position: relative;
+}
+.ticker__brand::before { content: '●'; color: var(--mustard); animation: pulse 1.6s infinite; }
+@keyframes pulse { 0%,100%{opacity:1} 50%{opacity:.3} }
+
+.ticker__track { display: flex; gap: 0; white-space: nowrap; animation: marquee 38s linear infinite; padding-left: 100%; }
+.ticker:hover .ticker__track { animation-play-state: paused; }
+.ticker__item { padding: 0 18px; }
+.ticker__item::before { content: '▸ '; color: var(--mustard); }
+.ticker__item b { color: var(--mustard); font-weight: 700; }
+@keyframes marquee { from { transform: translateX(0) } to { transform: translateX(-100%) } }
+@media (prefers-reduced-motion: reduce) { .ticker__track { animation: none; padding-left: 0; } }
+
+/* ── 5. Layout: shift main down for ticker ────────────────────── */
+.flex.h-screen { height: calc(100vh - 32px) !important; }
+
+/* ── 6. Sidebar — rotated wordmark + asymmetric ───────────────── */
+#sidebar {
+  background: var(--ink) !important;
+  border-right: none !important;
+  width: 240px !important;
+  position: relative;
+  color: var(--bone);
+}
+/* Vertical rotated edge label (the grid break) */
+#sidebar::after {
+  content: 'EDITION №01 · SPRING 2026';
+  position: absolute;
+  top: 50%; right: -10px;
+  transform: translateY(-50%) rotate(90deg); transform-origin: center;
+  font-family: var(--mono); font-size: 9px; letter-spacing: .35em;
+  color: var(--mustard); opacity: .55;
+  white-space: nowrap; pointer-events: none;
+}
+#sidebar > div:first-child {
+  background: transparent !important; border-bottom: 1px solid var(--rule) !important;
+  padding: 28px 24px !important;
+}
+#sidebar h1 {
+  font-family: var(--serif) !important;
+  font-weight: 300 !important;
+  font-size: 38px !important;
+  letter-spacing: -.04em !important;
+  line-height: .95 !important;
+  color: var(--bone) !important;
+  font-variation-settings: "SOFT" 100, "WONK" 1, "opsz" 144;
+  display: block !important;
+}
+#sidebar h1 i { display: none; }
+#sidebar h1::before { content: 'AI/'; color: var(--mustard); }
+#sidebar p { font-family: var(--mono) !important; font-size: 9px !important; letter-spacing: .25em; text-transform: uppercase; color: var(--gray-2) !important; opacity: .7; margin-top: 10px !important; }
+
+#sidebar nav { padding: 18px 0 !important; }
+/* Specificity bump: #sidebar .sidebar-link beats .text-gray-600 even with both !important */
+#sidebar a.sidebar-link, .sidebar-link {
+  position: relative;
+  border-radius: 0 !important;
+  padding: 11px 24px !important;
+  font-family: var(--sans) !important;
+  font-weight: 500 !important;
+  font-size: 13px !important;
+  color: var(--gray-2) !important;
+  letter-spacing: .01em;
+  transition: color .25s var(--ease), padding-left .25s var(--ease);
+  /* stagger entrance — base state is VISIBLE; animation just slides it in.
+     animation-fill-mode: backwards makes the from-state apply during delay,
+     so we get the staggered slide-in WITHOUT risking invisible links if the
+     animation never fires. */
+  animation: navIn .55s var(--ease) backwards;
+}
+.sidebar-link:nth-child(1){animation-delay:.05s}
+.sidebar-link:nth-child(2){animation-delay:.11s}
+.sidebar-link:nth-child(3){animation-delay:.17s}
+.sidebar-link:nth-child(4){animation-delay:.23s}
+.sidebar-link:nth-child(5){animation-delay:.29s}
+.sidebar-link:nth-child(6){animation-delay:.35s}
+.sidebar-link:nth-child(7){animation-delay:.41s}
+.sidebar-link:nth-child(8){animation-delay:.47s}
+.sidebar-link:nth-child(9){animation-delay:.53s}
+@keyframes navIn {
+  from { opacity: 0; transform: translateX(-12px); }
+  to   { opacity: 1; transform: translateX(0); }
+}
+
+.sidebar-link::before {
+  content: ''; position: absolute; left: 0; top: 0; bottom: 0;
+  width: 3px; background: var(--oxblood); transform: scaleY(0); transform-origin: top;
+  transition: transform .35s var(--ease);
+}
+.sidebar-link:hover { color: var(--bone) !important; background: transparent !important; padding-left: 32px !important; }
+.sidebar-link:hover::before { transform: scaleY(1); }
+.sidebar-link.active { background: transparent !important; color: var(--mustard) !important; padding-left: 32px !important; }
+.sidebar-link.active::before { transform: scaleY(1); background: var(--mustard); }
+
+/* sidebar footer */
+#sidebar > div:last-child { border-top: 1px solid var(--rule) !important; padding: 18px 24px !important; }
+#sidebar > div:last-child .bg-gray-50 { background: var(--rule) !important; border-radius: 2px !important; padding: 12px !important; }
+#sidebar > div:last-child .text-xs { color: var(--gray-2) !important; }
+.provider-btn {
+  font-family: var(--mono) !important;
+  font-size: 9.5px !important; font-weight: 700 !important; letter-spacing: .1em;
+  text-transform: uppercase;
+  background: transparent !important;
+  border: 1px solid var(--gray-1) !important;
+  border-radius: 0 !important;
+  color: var(--gray-2) !important;
+  padding: 5px 0 !important;
+  transition: all .2s var(--ease);
+}
+.provider-btn:hover { color: var(--bone) !important; border-color: var(--bone) !important; }
+.provider-btn.active { background: var(--mustard) !important; color: var(--ink) !important; border-color: var(--mustard) !important; box-shadow: none !important; }
+.provider-btn.active:hover { background: var(--bone) !important; }
+#llm-status-dot { background: var(--mustard) !important; }
+#llm-model-label { font-family: var(--mono) !important; color: var(--gray-2) !important; font-size: 9px !important; letter-spacing: .12em; text-transform: uppercase; }
+
+/* ── 7. Main canvas ───────────────────────────────────────────── */
+main { background: var(--bone) !important; padding: 0 !important; position: relative; overflow-x: hidden !important; }
+.page { padding: 56px 56px 80px 80px; position: relative; }
+.page.active { animation: pageIn .55s var(--ease); }
+@keyframes pageIn { from { opacity: 0; transform: translateY(14px); } to { opacity: 1; transform: translateY(0); } }
+.fade-in { animation: pageIn .55s var(--ease) !important; }
+
+/* ── 8. THE GIANT NUMERAL — bleeds off the left margin ────────── */
+.page::before {
+  content: attr(data-num);
+  position: absolute;
+  top: 32px; left: -8px;
+  font-family: var(--serif); font-weight: 200;
+  font-size: 240px; line-height: 1;
+  color: var(--ink); opacity: .055;
+  letter-spacing: -.06em;
+  font-variation-settings: "SOFT" 100, "WONK" 1, "opsz" 144;
+  pointer-events: none; user-select: none;
+  transition: transform .5s var(--ease), color .4s var(--ease), opacity .4s var(--ease);
+}
+.page:hover::before { transform: translateX(6px); color: var(--oxblood); opacity: .09; }
+
+/* Page H2 — editorial masthead */
+.page h2.text-2xl, .page > .flex h2, h2.text-2xl {
+  font-family: var(--serif) !important;
+  font-weight: 300 !important;
+  font-size: 64px !important;
+  line-height: .95 !important;
+  letter-spacing: -.035em !important;
+  color: var(--ink) !important;
+  margin-bottom: 8px !important;
+  font-variation-settings: "SOFT" 100, "WONK" 1, "opsz" 144;
+  position: relative; z-index: 1;
+}
+.page h2.text-2xl + p, .page > .flex p.text-sm { font-family: var(--mono) !important; font-size: 10.5px !important; letter-spacing: .18em; text-transform: uppercase; color: var(--sage) !important; margin-bottom: 36px !important; }
+
+/* Subhead h3 */
+h3 {
+  font-family: var(--serif) !important;
+  font-weight: 400 !important;
+  font-size: 22px !important;
+  letter-spacing: -.015em !important;
+  color: var(--ink) !important;
+  font-variation-settings: "SOFT" 100, "WONK" 0, "opsz" 32;
+}
+
+/* ── 9. Cards — newsprint panels, no rounded SaaS ─────────────── */
+.card, .bg-white {
+  background: var(--paper) !important;
+  border: 1px solid var(--ink) !important;
+  border-radius: 0 !important;
+  box-shadow: 6px 6px 0 var(--ink) !important;
+  position: relative;
+  transition: transform .25s var(--ease), box-shadow .25s var(--ease);
+}
+.card:hover {
+  transform: translate(-2px, -2px);
+  box-shadow: 9px 9px 0 var(--oxblood) !important;
+}
+
+/* exception: kanban cards stay light */
+.kanban-card { background: var(--paper) !important; border: 1px solid var(--ink) !important; box-shadow: 3px 3px 0 var(--ink) !important; border-radius: 0 !important; }
+.kanban-card:hover { box-shadow: 5px 5px 0 var(--oxblood) !important; transform: translate(-1px,-1px); }
+.kanban-col { background: transparent !important; border: 1px dashed var(--rule); border-radius: 0 !important; padding: 14px !important; }
+.kanban-col-header { border-bottom: 1px solid var(--ink); padding-bottom: 8px; margin-bottom: 12px !important; }
+.kanban-col-title { font-family: var(--mono) !important; font-size: 10px !important; letter-spacing: .18em; text-transform: uppercase; color: var(--ink) !important; }
+.kanban-count { background: var(--ink) !important; color: var(--bone) !important; border-radius: 0 !important; font-family: var(--mono) !important; border: none !important; }
+
+/* ── 10. Stat tiles — Dashboard asymmetric grid ───────────────── */
+#page-dashboard .grid.md\:grid-cols-3 {
+  display: grid !important;
+  grid-template-columns: 5fr 4fr 3fr !important;  /* asymmetric 5/4/3 */
+  gap: 0 !important;
+  margin-bottom: 0 !important;
+  border: 1px solid var(--ink);
+  background: var(--ink);
+}
+#page-dashboard .grid.md\:grid-cols-3 .card,
+#page-dashboard .grid.md\:grid-cols-3 .bg-white {
+  border: none !important;
+  border-right: 1px solid var(--ink) !important;
+  box-shadow: none !important;
+  border-radius: 0 !important;
+  padding: 36px 32px !important;
+}
+#page-dashboard .grid.md\:grid-cols-3 > *:last-child { border-right: none !important; }
+#page-dashboard .grid.md\:grid-cols-3 .card:hover { transform: none; box-shadow: inset 0 -4px 0 var(--oxblood) !important; }
+
+#page-dashboard .grid.md\:grid-cols-3 .text-sm.text-gray-500 {
+  font-family: var(--mono) !important; font-size: 9.5px !important; letter-spacing: .22em; text-transform: uppercase; color: var(--sage) !important; font-weight: 600;
+}
+#page-dashboard .grid.md\:grid-cols-3 .text-3xl {
+  font-family: var(--serif) !important; font-weight: 300 !important;
+  font-size: 86px !important; line-height: .9 !important;
+  letter-spacing: -.05em !important;
+  color: var(--ink) !important;
+  font-variation-settings: "SOFT" 100, "WONK" 1, "opsz" 144;
+  margin-top: 14px !important;
+}
+#page-dashboard .grid.md\:grid-cols-3 .text-indigo-600 { color: var(--ink) !important; }
+#page-dashboard .grid.md\:grid-cols-3 .text-emerald-600 { color: var(--oxblood) !important; }
+#page-dashboard .grid.md\:grid-cols-3 .text-green-600 { color: var(--sage) !important; }
+#page-dashboard .grid.md\:grid-cols-3 .w-12 { display: none !important; } /* kill the icon tiles */
+
+/* dashboard chart card */
+#page-dashboard > div.card { margin-top: 32px; padding: 32px !important; }
+#category-chart .text-sm { font-family: var(--mono) !important; font-size: 10px !important; letter-spacing: .15em; text-transform: uppercase; }
+#category-chart .bg-indigo-500, #category-chart [style*="background"] { background: var(--ink) !important; }
+#category-chart .bg-gray-100, #category-chart .bg-gray-200 { background: var(--mark) !important; }
+
+/* ── 11. Buttons — stamps, not pills ──────────────────────────── */
+button, .bg-indigo-600 {
+  font-family: var(--sans) !important;
+  font-weight: 600 !important;
+  letter-spacing: .04em;
+  border-radius: 0 !important;
+}
+.bg-indigo-600, button.bg-indigo-600 {
+  background: var(--ink) !important; color: var(--bone) !important;
+  border: 1px solid var(--ink) !important;
+  box-shadow: 4px 4px 0 var(--oxblood);
+  transition: transform .15s var(--ease), box-shadow .15s var(--ease);
+}
+.bg-indigo-600:hover, button.bg-indigo-600:hover {
+  background: var(--oxblood) !important; color: var(--bone) !important;
+  transform: translate(-2px,-2px); box-shadow: 6px 6px 0 var(--ink);
+}
+.hover\:bg-indigo-700:hover { background: var(--oxblood) !important; }
+
+/* secondary / pill suggestions */
+.bg-gray-100 { background: var(--mark) !important; color: var(--ink) !important; border: 1px solid var(--ink) !important; border-radius: 0 !important; }
+.hover\:bg-gray-200:hover { background: var(--mustard) !important; }
+.rounded-full { border-radius: 0 !important; }
+
+/* ── 12. Inputs / selects ─────────────────────────────────────── */
+input, select, textarea {
+  font-family: var(--sans) !important;
+  background: transparent !important;
+  border: none !important;
+  border-bottom: 1.5px solid var(--ink) !important;
+  border-radius: 0 !important;
+  padding: 8px 4px !important;
+  color: var(--ink) !important;
+  font-size: 14px !important;
+  transition: border-color .2s var(--ease), background .2s var(--ease);
+}
+input:focus, select:focus, textarea:focus {
+  outline: none !important;
+  border-bottom-color: var(--oxblood) !important;
+  background: var(--mark) !important;
+  box-shadow: none !important;
+}
+.focus\:ring-2:focus, .focus\:ring-indigo-200:focus, .focus\:border-indigo-400:focus { box-shadow: none !important; }
+label, .text-xs.font-medium {
+  font-family: var(--mono) !important;
+  font-size: 10px !important;
+  letter-spacing: .18em;
+  text-transform: uppercase;
+  color: var(--sage) !important;
+}
+
+/* ── 13. Sidebar links & active state colors override Tailwind ─ */
+.text-indigo-600 { color: var(--ink) !important; }
+.text-emerald-600 { color: var(--oxblood) !important; }
+.text-green-600 { color: var(--sage) !important; }
+.bg-indigo-50, .bg-emerald-50, .bg-green-50 { background: var(--mark) !important; }
+.text-indigo-500, .text-emerald-500, .text-green-500 { color: var(--ink) !important; }
+.border-indigo-400, .border-indigo-200 { border-color: var(--ink) !important; }
+.bg-indigo-700 { background: var(--oxblood) !important; }
+
+/* skill chips on candidate cards */
+.bg-indigo-100, [class*="bg-indigo-"] { background: var(--mark) !important; color: var(--ink) !important; }
+.kanban-card .card-skill { background: var(--mark) !important; color: var(--ink) !important; border-radius: 0 !important; font-family: var(--mono) !important; font-size: 9px !important; letter-spacing: .08em; }
+
+/* ── 14. Mobile header ────────────────────────────────────────── */
+#mobile-header { background: var(--ink) !important; border-bottom: 1px solid var(--ink) !important; }
+#mobile-header h1 { font-family: var(--serif) !important; font-weight: 300 !important; color: var(--bone) !important; }
+#mobile-header h1::before { content: 'AI/'; color: var(--mustard); }
+#mobile-header h1 i { display: none; }
+#mobile-header button { color: var(--bone) !important; }
+
+/* ── 15. Dropzone (upload) ────────────────────────────────────── */
+#drop-zone {
+  border: 2px dashed var(--ink) !important;
+  border-radius: 0 !important;
+  background: var(--paper);
+  transition: background .25s var(--ease);
+}
+#drop-zone:hover { background: var(--mark); }
+
+/* ── 16. Modal — stays editorial ──────────────────────────────── */
+#email-modal .bg-white { background: var(--paper) !important; border-radius: 0 !important; box-shadow: 12px 12px 0 var(--oxblood) !important; }
+#email-modal h3 { font-family: var(--serif) !important; font-size: 30px !important; font-weight: 300 !important; }
+.border-indigo-600 { border-color: var(--oxblood) !important; }
+.text-indigo-600 { color: var(--oxblood) !important; }
+
+/* ── 17. Loaders ─────────────────────────────────────────────── */
+.loader { border-color: var(--mark) !important; border-top-color: var(--oxblood) !important; }
+
+/* ── 18. Misc text override ──────────────────────────────────── */
+/* belt + suspenders: exclude sidebar links so they don't get repainted ink-black */
+.text-gray-500:not(.sidebar-link), .text-gray-600:not(.sidebar-link),
+.text-gray-700:not(.sidebar-link), .text-gray-800:not(.sidebar-link) { color: var(--ink) !important; }
+.text-gray-400 { color: var(--gray-1) !important; }
+.text-gray-300 { color: var(--gray-2) !important; }
+.border-gray-200, .border-gray-100 { border-color: var(--ink) !important; }
+
+/* font weight fixes - reduce Tailwind's heavy use of bold */
+.font-bold { font-weight: 600 !important; }
+
+/* monospace for code/pre */
+pre, code { font-family: var(--mono) !important; }
+
+/* ── 19. Section number per page (data-num attribute) ─────────── */
+#page-dashboard   { } /* set in markup via data-num */
+/* numbers themselves come from data-num attribute on .page div */
+
+/* ── 20. Title underline draw on card hover (memorable detail) ── */
+.card h3 { display: inline-block; padding-bottom: 4px; background-image: linear-gradient(var(--oxblood),var(--oxblood)); background-size: 0% 2px; background-position: 0 100%; background-repeat: no-repeat; transition: background-size .3s var(--ease); }
+.card:hover h3 { background-size: 100% 2px; }
+
+/* ── 21. Reduce-motion ─────────────────────────────────────────── */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { animation-duration: .01ms !important; animation-iteration-count: 1 !important; transition-duration: .01ms !important; }
+}
+
+/* ── 22. Mobile tweaks ─────────────────────────────────────────── */
+@media (max-width: 768px) {
+  .page { padding: 80px 20px 40px; }
+  .page::before { font-size: 140px; top: 60px; }
+  .page h2.text-2xl, h2.text-2xl { font-size: 42px !important; }
+  #page-dashboard .grid.md\:grid-cols-3 { grid-template-columns: 1fr !important; }
+  #page-dashboard .grid.md\:grid-cols-3 .card { border-right: none !important; border-bottom: 1px solid var(--ink) !important; }
+  #sidebar::after { display: none; }
+  .ticker__brand { font-size: 9px; padding: 0 10px; }
+}

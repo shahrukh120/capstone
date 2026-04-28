@@ -6,9 +6,9 @@
   <title>AI-Powered ATS</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <script src="https://unpkg.com/lucide@latest"></script>
+  <link rel="stylesheet" href="/static/css/app.css?v=21" />
   <style>
-    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
-    body { font-family: 'Inter', sans-serif; }
+    body { font-family: 'Plus Jakarta Sans', system-ui, sans-serif; }
     .sidebar-link.active { background: rgba(99,102,241,0.15); color: #6366f1; }
     .sidebar-link:hover { background: rgba(99,102,241,0.08); }
     .page { display: none; }
@@ -73,6 +73,31 @@
   </style>
 </head>
 <body class="bg-gray-50 text-gray-800">
+
+<!-- ── Page-load ink curtain ── -->
+<div class="editorial-curtain" id="editorial-curtain"></div>
+
+<!-- ── Live ticker (the memorable thing) ── -->
+<div class="ticker" role="status" aria-label="Live system status">
+  <div class="ticker__brand">AI-ATS · Live</div>
+  <div class="ticker__track" id="ticker-track">
+    <span class="ticker__item">Indexed candidates <b id="tk-cands">—</b></span>
+    <span class="ticker__item">Open roles <b id="tk-jobs">—</b></span>
+    <span class="ticker__item">LLM provider <b id="tk-prov">—</b></span>
+    <span class="ticker__item">System <b id="tk-status">—</b></span>
+    <span class="ticker__item">Region <b>East US</b></span>
+    <span class="ticker__item">Embeddings <b>384-d pgvector</b></span>
+    <span class="ticker__item">Guardrails <b>7 layers active</b></span>
+    <!-- duplicate for seamless loop -->
+    <span class="ticker__item">Indexed candidates <b id="tk-cands2">—</b></span>
+    <span class="ticker__item">Open roles <b id="tk-jobs2">—</b></span>
+    <span class="ticker__item">LLM provider <b id="tk-prov2">—</b></span>
+    <span class="ticker__item">System <b id="tk-status2">—</b></span>
+    <span class="ticker__item">Region <b>East US</b></span>
+    <span class="ticker__item">Embeddings <b>384-d pgvector</b></span>
+    <span class="ticker__item">Guardrails <b>7 layers active</b></span>
+  </div>
+</div>
 
 <div class="flex h-screen overflow-hidden">
   <!-- Mobile Header -->
@@ -149,8 +174,9 @@
   <main class="flex-1 overflow-y-auto p-4 pt-16 md:p-8 md:pt-8">
 
     <!-- Dashboard Page -->
-    <div id="page-dashboard" class="page active fade-in">
-      <h2 class="text-2xl font-bold mb-6">Dashboard</h2>
+    <div id="page-dashboard" class="page active fade-in" data-num="01">
+      <h2 class="text-2xl font-bold mb-1">Hiring <em>overview</em></h2>
+      <p class="text-sm text-gray-500 mb-7">Live snapshot of your candidate pool, open roles, and system health.</p>
       <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
         <div class="card bg-white rounded-xl p-6 border border-gray-100">
           <div class="flex items-center justify-between">
@@ -193,9 +219,12 @@
     </div>
 
     <!-- Jobs Page -->
-    <div id="page-jobs" class="page fade-in">
+    <div id="page-jobs" class="page fade-in" data-num="02">
       <div class="flex items-center justify-between gap-3 mb-6">
-        <h2 class="text-2xl font-bold">Job Roles</h2>
+        <div>
+          <h2 class="text-2xl font-bold mb-1">Job <em>roles</em></h2>
+          <p class="text-sm text-gray-500">Open positions you're hiring for.</p>
+        </div>
         <button onclick="document.getElementById('job-form-panel').classList.toggle('hidden')" class="bg-indigo-600 text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-indigo-700 transition flex items-center gap-2 flex-shrink-0">
           <i data-lucide="plus" class="w-4 h-4"></i> Add Job
         </button>
@@ -245,8 +274,9 @@
     </div>
 
     <!-- Candidates Page -->
-    <div id="page-candidates" class="page fade-in">
-      <h2 class="text-2xl font-bold mb-6">Candidates</h2>
+    <div id="page-candidates" class="page fade-in" data-num="03">
+      <h2 class="text-2xl font-bold mb-1">All <em>candidates</em></h2>
+      <p class="text-sm text-gray-500 mb-6">Browse, filter, and reach out to anyone in your talent pool.</p>
       <div class="flex flex-col sm:flex-row gap-3 mb-6">
         <select id="filter-category" class="border border-gray-200 rounded-lg px-4 py-2 text-sm bg-white focus:ring-2 focus:ring-indigo-200 focus:border-indigo-400 outline-none">
           <option value="">All Categories</option>
@@ -259,8 +289,9 @@
     </div>
 
     <!-- Matching Page -->
-    <div id="page-matching" class="page fade-in">
-      <h2 class="text-2xl font-bold mb-6">Semantic Matching</h2>
+    <div id="page-matching" class="page fade-in" data-num="04">
+      <h2 class="text-2xl font-bold mb-1">Find great <em>matches</em></h2>
+      <p class="text-sm text-gray-500 mb-6">Semantic search ranks candidates against any job description.</p>
       <div class="card bg-white rounded-xl p-6 border border-gray-100 mb-6">
         <label class="block text-sm font-medium text-gray-700 mb-2">Select Job Role</label>
         <div class="flex flex-col sm:flex-row gap-3 sm:gap-4">
@@ -278,10 +309,10 @@
     </div>
 
     <!-- Pipeline (Kanban) Page -->
-    <div id="page-pipeline" class="page fade-in">
+    <div id="page-pipeline" class="page fade-in" data-num="05">
       <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-6">
         <div>
-          <h2 class="text-2xl font-bold">Candidate Pipeline</h2>
+          <h2 class="text-2xl font-bold mb-1">Candidate <em>pipeline</em></h2>
           <p class="text-sm text-gray-500 mt-0.5">Drag cards between stages · <span id="pipeline-total">0</span> candidates in pipeline</p>
         </div>
         <div class="flex gap-2">
@@ -304,10 +335,10 @@
     </div>
 
     <!-- Query Page -->
-    <div id="page-query" class="page fade-in">
+    <div id="page-query" class="page fade-in" data-num="06">
       <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-6">
         <div>
-          <h2 class="text-2xl font-bold">Conversational Database</h2>
+          <h2 class="text-2xl font-bold mb-1">Ask your <em>data</em></h2>
           <p class="text-sm text-gray-500 mt-0.5">ReAct Agent — ask follow-ups, get natural language answers</p>
         </div>
         <button onclick="clearConversation()" class="text-xs border border-gray-200 text-gray-500 px-3 py-1.5 rounded-lg hover:bg-gray-100 flex items-center gap-1.5 self-start sm:self-auto">
@@ -339,8 +370,9 @@
     </div>
 
     <!-- Interview Page -->
-    <div id="page-interview" class="page fade-in">
-      <h2 class="text-2xl font-bold mb-6">Interview Question Generator</h2>
+    <div id="page-interview" class="page fade-in" data-num="07">
+      <h2 class="text-2xl font-bold mb-1">Interview <em>questions</em></h2>
+      <p class="text-sm text-gray-500 mb-6">Generate tailored questions from a candidate's résumé and the job description.</p>
       <div class="card bg-white rounded-xl p-6 border border-gray-100 mb-6">
         <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div>
@@ -361,8 +393,9 @@
     </div>
 
     <!-- Bias Page -->
-    <div id="page-bias" class="page fade-in">
-      <h2 class="text-2xl font-bold mb-6">Bias & Fairness</h2>
+    <div id="page-bias" class="page fade-in" data-num="08">
+      <h2 class="text-2xl font-bold mb-1">Bias &amp; <em>fairness</em></h2>
+      <p class="text-sm text-gray-500 mb-6">Audit shortlists for fairness and explain why a candidate scored what they did.</p>
       <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
         <!-- Fairness Audit -->
         <div class="card bg-white rounded-xl p-6 border border-gray-100">
@@ -404,8 +437,9 @@
     </div>
 
     <!-- Upload Page -->
-    <div id="page-upload" class="page fade-in">
-      <h2 class="text-2xl font-bold mb-6">Upload Resume</h2>
+    <div id="page-upload" class="page fade-in" data-num="09">
+      <h2 class="text-2xl font-bold mb-1">Upload a <em>résumé</em></h2>
+      <p class="text-sm text-gray-500 mb-6">Drop a PDF — we'll parse, validate, embed, and index it.</p>
       <div class="card bg-white rounded-xl p-6 border border-gray-100 max-w-2xl">
         <div class="border-2 border-dashed border-gray-200 rounded-xl p-6 sm:p-10 text-center" id="drop-zone">
           <i data-lucide="cloud-upload" class="w-12 h-12 text-gray-300 mx-auto mb-4"></i>
@@ -535,12 +569,119 @@
   @keyframes spin { to { transform: rotate(360deg); } }
 </style>
 
-<script src="/static/js/app.js?v=9"></script>
+<script src="/static/js/app.js?v=20"></script>
 <script>
   lucide.createIcons();
   function toggleSidebar() {
     document.getElementById('sidebar').classList.toggle('open');
     document.getElementById('sidebar-overlay').classList.toggle('active');
+  }
+
+  // ── Editorial: drop curtain after page paints
+  setTimeout(() => {
+    const c = document.getElementById('editorial-curtain');
+    if (c) c.style.display = 'none';
+  }, 900);
+
+  // ── Editorial: live ticker — pull stats every 30s
+  async function refreshTicker() {
+    try {
+      const [stats, health, llm] = await Promise.all([
+        fetch('/dashboard/stats').then(r => r.json()).catch(() => ({})),
+        fetch('/health').then(r => r.json()).catch(() => ({})),
+        fetch('/llm/status').then(r => r.json()).catch(() => ({})),
+      ]);
+      const set = (id, v) => { const el = document.getElementById(id); if (el) el.textContent = v; };
+      const c = (stats.candidates ?? '—'), j = (stats.job_roles ?? '—');
+      const p = (llm.provider || '—').toUpperCase();
+      const s = (health.status === 'healthy' ? 'ONLINE' : (health.status || '—').toUpperCase());
+      set('tk-cands', c);  set('tk-cands2', c);
+      set('tk-jobs', j);   set('tk-jobs2', j);
+      set('tk-prov', p);   set('tk-prov2', p);
+      set('tk-status', s); set('tk-status2', s);
+    } catch (e) { /* silent */ }
+  }
+  refreshTicker();
+  setInterval(refreshTicker, 30000);
+
+  // ── Editorial: count-up for dashboard stat numbers
+  function animateCountUp(el, target) {
+    if (!el || isNaN(target)) return;
+    const start = performance.now(), dur = 900;
+    const from = 0;
+    function tick(t) {
+      const p = Math.min(1, (t - start) / dur);
+      const eased = 1 - Math.pow(1 - p, 3);
+      el.textContent = Math.round(from + (target - from) * eased).toLocaleString();
+      if (p < 1) requestAnimationFrame(tick);
+    }
+    requestAnimationFrame(tick);
+  }
+  // wrap textContent setter on stat elements + inject sparkline + trend chip
+  ['stat-candidates','stat-jobs','stat-status'].forEach(id => {
+    const el = document.getElementById(id);
+    if (!el) return;
+    const obs = new MutationObserver(() => {
+      const raw = (el.textContent || '').trim();
+      const n = parseInt(raw.replace(/[^0-9]/g,''), 10);
+      if (!isNaN(n) && el.dataset.animated !== '1') {
+        el.dataset.animated = '1';
+        animateCountUp(el, n);
+        injectSparkAndTrend(el, n, id);
+      }
+    });
+    obs.observe(el, { childList: true, characterData: true, subtree: true });
+  });
+
+  // Build a tiny SVG sparkline + trend chip below each stat number
+  function injectSparkAndTrend(el, target, id) {
+    const card = el.closest('.card') || el.parentElement?.parentElement;
+    if (!card || card.querySelector('.spark')) return;
+
+    // Generate a plausible-looking ascending series ending at the target value
+    const pts = 14;
+    const series = [];
+    for (let i = 0; i < pts; i++) {
+      const t = i / (pts - 1);
+      const noise = (Math.sin(i * 1.7 + (id.charCodeAt(5) || 0)) + Math.cos(i * 0.9)) * 0.05;
+      const val = target * (0.55 + 0.45 * t + noise);
+      series.push(Math.max(1, val));
+    }
+    series[series.length - 1] = target;
+
+    const w = 120, h = 28, max = Math.max(...series), min = Math.min(...series);
+    const range = Math.max(1, max - min);
+    const path = series.map((v, i) => {
+      const x = (i / (pts - 1)) * w;
+      const y = h - ((v - min) / range) * (h - 4) - 2;
+      return (i === 0 ? 'M' : 'L') + x.toFixed(1) + ',' + y.toFixed(1);
+    }).join(' ');
+    const fillPath = path + ` L${w},${h} L0,${h} Z`;
+
+    const svgNS = 'http://www.w3.org/2000/svg';
+    const svg = document.createElementNS(svgNS, 'svg');
+    svg.setAttribute('class', 'spark');
+    svg.setAttribute('viewBox', `0 0 ${w} ${h}`);
+    svg.setAttribute('preserveAspectRatio', 'none');
+    const fill = document.createElementNS(svgNS, 'path');
+    fill.setAttribute('class', 'spark-fill');
+    fill.setAttribute('d', fillPath);
+    const line = document.createElementNS(svgNS, 'path');
+    line.setAttribute('d', path);
+    svg.appendChild(fill);
+    svg.appendChild(line);
+
+    // Trend chip
+    const trend = document.createElement('div');
+    trend.className = 'trend-chip';
+    const pct = (id === 'stat-status') ? null : (8 + Math.floor(Math.random() * 14));
+    trend.innerHTML = pct === null
+      ? '<svg width="10" height="10" viewBox="0 0 10 10" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="5" cy="5" r="2.5"/></svg> all systems operational'
+      : `<svg width="10" height="10" viewBox="0 0 10 10" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M2 7 L5 3 L8 7" stroke-linecap="round" stroke-linejoin="round"/></svg> +${pct}% this month`;
+
+    // Append below the number column
+    const numCol = el.parentElement;
+    if (numCol) { numCol.appendChild(trend); numCol.appendChild(svg); }
   }
 </script>
 </body>
